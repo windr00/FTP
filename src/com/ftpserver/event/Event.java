@@ -68,7 +68,7 @@ public class Event {
         Method method = object.getClass().getMethod(this.method, this.argTypes);
 
         if (method != null) {
-            method.invoke(args, argTypes);
+            method.invoke(object, args);
         }
     }
 }
