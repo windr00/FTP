@@ -38,4 +38,9 @@ public class FileIO {
         bw.write(content);
         bw.close();
     }
+
+    public boolean exist(String path) {
+        File file = new File(path);
+        return file.exists();
+    }
 }
