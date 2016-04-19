@@ -1,5 +1,7 @@
 package com.ftpserver.fileIO;
 
+import com.ftpserver.Config;
+
 import java.io.*;
 
 /**
@@ -16,8 +18,8 @@ public class FileIO {
         return _instance;
     }
 
-    public char[] read(String path) throws Exception {
-        File file = new File(path);
+    public byte[] read(String path) throws Exception {
+        File file = new File(Config.getInstance().getRoot() + path);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String tmp = null;
         StringBuilder sb = new StringBuilder();
@@ -29,18 +31,23 @@ public class FileIO {
         }
         br.close();
 
-        return sb.toString().toCharArray();
+        return sb.toString().getBytes();
     }
 
     public void write(String path, char[] content) throws Exception {
-        File file = new File(path);
+        File file = new File(Config.getInstance().getRoot() + path);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write(content);
         bw.close();
     }
 
     public boolean exist(String path) {
-        File file = new File(path);
+        File file = new File(Config.getInstance().getRoot() + path);
         return file.exists();
+    }
+
+    public BufferedReader open(String path) throws Exception {
+        File file = new File(Config.getInstance().getRoot() + path);
+        return new BufferedReader(new FileReader(file));
     }
 }
