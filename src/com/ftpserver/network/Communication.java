@@ -51,8 +51,8 @@ public class Communication {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(ostream));
         bw.write(data);
         bw.flush();
-        bw.close();
-        ostream.close();
+        //bw.close();
+        //ostream.close();
         this.eventHandler.invokeAll(data.length);
     }
 
@@ -60,8 +60,8 @@ public class Communication {
         InputStream istream = client.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String str = br.readLine();
-        br.close();
-        istream.close();
+        //br.close();
+        //istream.close();
         this.eventHandler.invokeAll(str.toCharArray().length);
         return str.toCharArray();
     }

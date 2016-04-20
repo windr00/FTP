@@ -9,6 +9,8 @@ public class Statics {
 
     public static final int FILE_READ_BUFFER_LENGTH = 1024;
 
+    public static final int NET_READ_BUFFER_LENGTH = 1024;
+
     //    λ	接入命令：USER、PASS、ACCT、REIN、QUIT和ABOR；
 //    λ	文件管理命令：CWD、CDUP、DELE、LIST、NLIST、MKD、PWD、RMD、RNFR、RNTO和SMNT；
 //    λ	数据格式化命令：TYPE、STRU、MODE；
@@ -25,9 +27,14 @@ public class Statics {
     public static final String PWD_RETURN = "257 ";
     public static final String PORT_FAILED_RETURN = "500 PORT PARAM ERROR.";
     public static final String PORT_SUCC_RETURN = "200 PORT SUCCESSFUL";
-    public static final String RETR_STRART_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.";
+    public static final String RETR_STRART_A_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.";
+    public static final String RETR_STRART_I_RETURN = "150 OPENING BINARY MODE DATA CONNECTION.";
     public static final String RETR_SUCC_RETURN = "226 TRANSFER COMPLETE";
     public static final String RETR_FAILED_RETURN = "550 FILE NOT FOUND OR ACCESS DENIED.";
+    public static final String STOR_SUCC_RETURN = "226 TRANSFER COMPLETE";
+    public static final String STOR_FAILED_RETURN = "550 FILE NOT FOUND OR ACCESS DENIED.";
+    public static final String STOR_STRART_A_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.";
+    public static final String STOR_STRART_I_RETURN = "150 OPENING BINARY MODE DATA CONNECTION.";
 
 
     public enum NET_TRANSFER_TYPE {

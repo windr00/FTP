@@ -2,12 +2,16 @@ package com.ftpserver.commandhandler;
 
 import com.ftpserver.Statics;
 import com.ftpserver.agent.UserLoginAgent;
+import com.ftpserver.event.Event;
+import com.ftpserver.event.EventHandler;
 import com.ftpserver.fileIO.FileIO;
 import com.ftpserver.logger.ConsoleLogger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -27,71 +31,88 @@ public class CMDHandler {
 
     private int portPort;
 
-    private Socket pasvSocket = null;
+    private ServerSocket pasvSocket = null;
 
     private String currentPath = "/";
 
     private FileIO fileIOInstance = FileIO.getInstance();
 
+    private EventHandler onResponseEventHandler;
+
+    public CMDHandler(Object obj, String mtd) {
+        onResponseEventHandler = new EventHandler();
+        onResponseEventHandler.addEvent(new Event(obj, mtd));
+    }
+
+
     private void logException(Exception e) {
+
         ConsoleLogger.error(String.valueOf(System.currentTimeMillis()));
         ConsoleLogger.error(e.toString());
         ConsoleLogger.error(e.getMessage());
         e.printStackTrace(System.out);
     }
 
-    public String USER(String cmd) {
-        username = cmd.trim();
-        return Statics.USER_RETURN;
+    private void response(String msg) {
+        try {
+            onResponseEventHandler.invokeAll(msg);
+        } catch (Exception e) {
+            logException(e);
+        }
     }
 
-    public String PASS(String cmd) {
-        String userpass = cmd.trim();
+    public void USER(String args) {
+        username = args.trim();
+        response(Statics.USER_RETURN);
+    }
+
+    public void PASS(String args) {
+        String userpass = args.trim();
         isloggedin = UserLoginAgent.userAuthenticate(username, userpass);
         if (isloggedin) {
-            return Statics.PASS_LOGEDIN_RETURN;
+            response(Statics.PASS_LOGEDIN_RETURN);
         } else {
-            return Statics.PASS_FAILED_RETURN;
+            response(Statics.PASS_FAILED_RETURN);
         }
     }
 
-    public String QUIT(String cmd) {
-        return Statics.QUIT_RETURN;
+    public void QUIT(String args) {
+        response(Statics.QUIT_RETURN);
     }
 
-    public String TYPE(String cmd) {
-        if (cmd.trim().equals("A")) {
+    public void TYPE(String args) {
+        if (args.trim().equals("A")) {
             netType = Statics.TRANSFER_TYPE.ASCII;
-            return Statics.TYPE_RETURN + netType.toString();
-        } else if (cmd.trim().equals("I")) {
+            response(Statics.TYPE_RETURN + netType.toString());
+        } else if (args.trim().equals("I")) {
             netType = Statics.TRANSFER_TYPE.BINARY;
-            return Statics.TYPE_RETURN + netType.toString();
+            response(Statics.TYPE_RETURN + netType.toString());
         } else {
-            return Statics.TYPE_FAILED_RETURN;
+            response(Statics.TYPE_FAILED_RETURN);
         }
     }
 
-    public String NOOP(String cmd) {
-        return Statics.NOOP_RETURN;
+    public void NOOP(String args) {
+        response(Statics.NOOP_RETURN);
     }
 
-    public String CWD(String cmd) {
-        if (fileIOInstance.exist(cmd)) {
-            currentPath = cmd;
-            return Statics.CWD_SUCC_RETURN;
+    public void CWD(String args) {
+        if (fileIOInstance.exist(args)) {
+            currentPath = args;
+            response(Statics.CWD_SUCC_RETURN);
         } else {
-            return Statics.CWD_FAILED_RETURN;
+            response(Statics.CWD_FAILED_RETURN);
         }
     }
 
-    public String PWD(String cmd) {
-        return Statics.PWD_RETURN + currentPath;
+    public void PWD(String args) {
+        response(Statics.PWD_RETURN + currentPath);
     }
 
-    public String PORT(String cmd) {
-        String[] params = cmd.split(",");
+    public void PORT(String args) {
+        String[] params = args.split(",");
         if (params.length <= 4 || params.length >= 7) {
-            return Statics.PORT_FAILED_RETURN;
+            response(Statics.PORT_FAILED_RETURN);
         }
         netMode = Statics.TRANSFER_MODE.PORT;
         this.portHost = params[0] + "." + params[1] + "." + params[2] + "." + params[3];
@@ -104,10 +125,10 @@ public class CMDHandler {
             portL = params[4];
         }
         portPort = Integer.parseInt(portH) * 256 + Integer.parseInt(portL);
-        return Statics.PORT_SUCC_RETURN;
+        response(Statics.PORT_SUCC_RETURN);
     }
 
-    public String PASV(String cmd) {
+    public void PASV(String args) {
         throw new NotImplementedException();
     }
 
@@ -121,19 +142,24 @@ public class CMDHandler {
         return str.getBytes();
     }
 
-    public String RETR(String cmd) {
+    public void RETR(String args) {
         try {
-            String filepath = cmd.trim();
+            String filepath = args.trim();
             Socket dataSocket = null;
             if (netMode == Statics.TRANSFER_MODE.PORT) {
                 dataSocket = new Socket(this.portHost, this.portPort);
             } else {
-
+                dataSocket = pasvSocket.accept();
             }
             BufferedReader filereader = fileIOInstance.open(filepath);
             char buffer[] = new char[Statics.FILE_READ_BUFFER_LENGTH];
             OutputStream ostream = dataSocket.getOutputStream();
             int current_length = 0;
+            if (netType == Statics.TRANSFER_TYPE.ASCII) {
+                response(Statics.RETR_STRART_A_RETURN);
+            } else {
+                response(Statics.RETR_STRART_I_RETURN);
+            }
             while ((current_length = filereader.read(buffer)) != -1) {
                 byte b[] = new String(buffer).getBytes();
                 if (netType == Statics.TRANSFER_TYPE.ASCII) {
@@ -147,18 +173,46 @@ public class CMDHandler {
             ostream.close();
             filereader.close();
             dataSocket.close();
-            return Statics.RETR_SUCC_RETURN;
+            response(Statics.RETR_SUCC_RETURN);
         } catch (Exception e) {
             logException(e);
-            return Statics.RETR_FAILED_RETURN;
+            response(Statics.RETR_FAILED_RETURN);
         }
     }
 
-    public String STOR(String cmd) {
+    public void STOR(String args) {
+        args = args.trim();
         try {
+            Socket dataSocket = null;
+            if (netMode == Statics.TRANSFER_MODE.PORT) {
+                dataSocket = new Socket(portHost, portPort);
+            } else {
+                dataSocket = pasvSocket.accept();
+            }
+
+            InputStream istream = dataSocket.getInputStream();
+            byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
+            int amount = 0;
+            if (netType == Statics.TRANSFER_TYPE.ASCII) {
+                response(Statics.STOR_STRART_A_RETURN);
+            } else {
+                response(Statics.STOR_STRART_I_RETURN);
+            }
+            while ((amount = istream.read(buffer)) != -1) {
+
+                fileIOInstance.write(args, new String(buffer).toCharArray(), amount);
+            }
+            istream.close();
+            dataSocket.close();
+            response(Statics.STOR_SUCC_RETURN);
 
         } catch (Exception e) {
-
+            logException(e);
+            response(Statics.STOR_FAILED_RETURN);
         }
+    }
+
+    public void LIST(String args) {
+
     }
 }

@@ -34,10 +34,14 @@ public class FileIO {
         return sb.toString().getBytes();
     }
 
-    public void write(String path, char[] content) throws Exception {
+    public void write(String path, char[] content, int length) throws Exception {
         File file = new File(Config.getInstance().getRoot() + path);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(content);
+        char[] c = new char[length];
+        for (int i = 0; i < length; i++) {
+            c[i] = content[i];
+        }
+        bw.write(c);
         bw.close();
     }
 
