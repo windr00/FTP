@@ -3,7 +3,6 @@ package com.ftpserver.network;
 import com.ftpserver.commandhandler.CMDHandler;
 import com.ftpserver.logger.ConsoleLogger;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
@@ -39,28 +38,30 @@ public class ClientSocketThread extends Thread {
 
     @Override
     public void run() {
-        try {
             while (true) {
-                String cmd = new String(communicationInstance.read(client));
-                String op = cmd.substring(0, 4);
-                ConsoleLogger.info(client.toString());
-                ConsoleLogger.info(op);
-                cmd = cmd.substring(4);
+                try {
+                    String cmd = new String(communicationInstance.read(client));
+                    String[] params = cmd.split(" ");
+                    String op = params[0];
+                    ConsoleLogger.info(client.toString());
+                    cmd = "";
+                    for (int i = 1; i < params.length; i++) {
+                        cmd += params[i];
+                    }
 
-                Method handle = handler.getClass().getMethod(op.trim(), String.class);
-                handle.invoke(handler, cmd);
+                    Method handle = handler.getClass().getMethod(op.trim(), String.class);
+                    handle.invoke(handler, cmd);
+                    if (op.equals("QUIT")) {
+                        client.close();
+                        ConsoleLogger.info("CLOSE ON " + client.toString());
+                        break;
+                    }
+                } catch (Exception e) {
+                    ConsoleLogger.error(e.getMessage());
+                    e.printStackTrace();
 
-                if (op.equals("QUIT")) {
-                    client.close();
-                    ConsoleLogger.info("CLOSE ON " + client.toString());
-                    break;
                 }
-            }
-
-        } catch (Exception e) {
-            if (e.getClass() == IOException.class) {
-                ConsoleLogger.error(e.getMessage());
-            }
         }
+
     }
 }

@@ -16,7 +16,7 @@ public class Main {
             communication.bind(1026, 3);
             while (true) {
                 Socket client = communication.accept();
-                ConsoleLogger.info(client.toString());
+                communication.send(client, Statics.INIT_RETURN.toCharArray());
                 ClientSocketThread thread = new ClientSocketThread(client);
                 thread.start();
             }

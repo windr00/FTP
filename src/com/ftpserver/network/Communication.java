@@ -2,6 +2,7 @@ package com.ftpserver.network;
 
 import com.ftpserver.event.Event;
 import com.ftpserver.event.EventHandler;
+import com.ftpserver.logger.ConsoleLogger;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -53,6 +54,7 @@ public class Communication {
         bw.flush();
         //bw.close();
         //ostream.close();
+        ConsoleLogger.info("SEND " + client.toString() + new String(data));
         this.eventHandler.invokeAll(data.length);
     }
 
@@ -60,6 +62,7 @@ public class Communication {
         InputStream istream = client.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String str = br.readLine();
+        ConsoleLogger.info("READ " + client.toString() + str);
         //br.close();
         //istream.close();
         this.eventHandler.invokeAll(str.toCharArray().length);

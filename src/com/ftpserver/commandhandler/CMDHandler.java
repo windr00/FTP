@@ -106,11 +106,23 @@ public class CMDHandler {
     }
 
     public void PWD(String args) {
-        response(Statics.PWD_RETURN + currentPath);
+        response(Statics.PWD_RETURN + currentPath + "\n");
+    }
+
+    public void SYST(String args) {
+        response(Statics.SYST_RETURN);
+    }
+
+    public void FEAT(String args) {
+        response(Statics.FEAT_RETURN);
+    }
+
+    public void OPTS(String args) {
+        response(Statics.OPTS_RETURN);
     }
 
     public void PORT(String args) {
-        String[] params = args.split(",");
+        String[] params = args.split(".");
         if (params.length <= 4 || params.length >= 7) {
             response(Statics.PORT_FAILED_RETURN);
         }
@@ -126,6 +138,10 @@ public class CMDHandler {
         }
         portPort = Integer.parseInt(portH) * 256 + Integer.parseInt(portL);
         response(Statics.PORT_SUCC_RETURN);
+    }
+
+    public void AUTH(String args) {
+        response(Statics.AUTH_RETURN);
     }
 
     public void PASV(String args) {
