@@ -5,12 +5,12 @@ import com.ftpserver.agent.UserLoginAgent;
 import com.ftpserver.event.Event;
 import com.ftpserver.event.EventHandler;
 import com.ftpserver.fileIO.FileIO;
-import com.ftpserver.logger.ConsoleLogger;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -44,29 +44,25 @@ public class CMDHandler {
         onResponseEventHandler.addEvent(new Event(obj, mtd));
     }
 
-
-    private void logException(Exception e) {
-
-        ConsoleLogger.error(String.valueOf(System.currentTimeMillis()));
-        ConsoleLogger.error(e.toString());
-        ConsoleLogger.error(e.getMessage());
-        e.printStackTrace(System.out);
-    }
-
-    private void response(String msg) {
+    public void cleanUp() {
         try {
-            onResponseEventHandler.invokeAll(msg);
+            pasvSocket.close();
         } catch (Exception e) {
-            logException(e);
+            return;
         }
     }
 
-    public void USER(String args) {
+
+    private void response(String msg) throws Exception {
+            onResponseEventHandler.invokeAll(msg);
+    }
+
+    public void USER(String args) throws Exception {
         username = args.trim();
         response(Statics.USER_RETURN);
     }
 
-    public void PASS(String args) {
+    public void PASS(String args) throws Exception {
         String userpass = args.trim();
         isloggedin = UserLoginAgent.userAuthenticate(username, userpass);
         if (isloggedin) {
@@ -76,27 +72,27 @@ public class CMDHandler {
         }
     }
 
-    public void QUIT(String args) {
+    public void QUIT(String args) throws Exception {
         response(Statics.QUIT_RETURN);
     }
 
-    public void TYPE(String args) {
+    public void TYPE(String args) throws Exception {
         if (args.trim().equals("A")) {
             netType = Statics.TRANSFER_TYPE.ASCII;
-            response(Statics.TYPE_RETURN + netType.toString());
+            response(Statics.TYPE_RETURN + netType.toString() + "\n");
         } else if (args.trim().equals("I")) {
             netType = Statics.TRANSFER_TYPE.BINARY;
-            response(Statics.TYPE_RETURN + netType.toString());
+            response(Statics.TYPE_RETURN + netType.toString() + "\n");
         } else {
             response(Statics.TYPE_FAILED_RETURN);
         }
     }
 
-    public void NOOP(String args) {
+    public void NOOP(String args) throws Exception {
         response(Statics.NOOP_RETURN);
     }
 
-    public void CWD(String args) {
+    public void CWD(String args) throws Exception {
         if (fileIOInstance.exist(args)) {
             currentPath = args;
             response(Statics.CWD_SUCC_RETURN);
@@ -105,24 +101,24 @@ public class CMDHandler {
         }
     }
 
-    public void PWD(String args) {
-        response(Statics.PWD_RETURN + currentPath + "\n");
+    public void PWD(String args) throws Exception {
+        response(Statics.PWD_RETURN + "\"" + currentPath + "\"\n");
     }
 
-    public void SYST(String args) {
+    public void SYST(String args) throws Exception {
         response(Statics.SYST_RETURN);
     }
 
-    public void FEAT(String args) {
+    public void FEAT(String args) throws Exception {
         response(Statics.FEAT_RETURN);
     }
 
-    public void OPTS(String args) {
+    public void OPTS(String args) throws Exception {
         response(Statics.OPTS_RETURN);
     }
 
-    public void PORT(String args) {
-        String[] params = args.split(".");
+    public void PORT(String args) throws Exception {
+        String[] params = args.split(",");
         if (params.length <= 4 || params.length >= 7) {
             response(Statics.PORT_FAILED_RETURN);
         }
@@ -140,12 +136,39 @@ public class CMDHandler {
         response(Statics.PORT_SUCC_RETURN);
     }
 
-    public void AUTH(String args) {
+    public void AUTH(String args) throws Exception {
         response(Statics.AUTH_RETURN);
     }
 
-    public void PASV(String args) {
-        throw new NotImplementedException();
+    private int getUnusedPort() {
+
+        int i = 1025;
+        while (true) {
+            try {
+                ServerSocket temp = new ServerSocket(i);
+                temp.close();
+                return i;
+            } catch (IOException e) {
+                i++;
+                continue;
+            }
+        }
+    }
+
+    public void PASV(String args) throws Exception {
+        try {
+            if (pasvSocket != null) {
+                pasvSocket.close();
+            }
+            int p = getUnusedPort();
+            pasvSocket = new ServerSocket(p);
+            String ip = InetAddress.getLocalHost().getHostAddress().replace('.', ',');
+            String port = String.valueOf(p / 256) + "," + String.valueOf(p % 256);
+            response(Statics.PASV_SUCC_RETURN + ip + "," + port + ")\n");
+        } catch (Exception e) {
+            response(Statics.PASV_FAILED_RETURN);
+            throw e;
+        }
     }
 
     private byte[] parseReturnChar(byte[] buffer) {
@@ -158,7 +181,7 @@ public class CMDHandler {
         return str.getBytes();
     }
 
-    public void RETR(String args) {
+    public void RETR(String args) throws Exception {
         try {
             String filepath = args.trim();
             Socket dataSocket = null;
@@ -176,6 +199,7 @@ public class CMDHandler {
             } else {
                 response(Statics.RETR_STRART_I_RETURN);
             }
+
             while ((current_length = filereader.read(buffer)) != -1) {
                 byte b[] = new String(buffer).getBytes();
                 if (netType == Statics.TRANSFER_TYPE.ASCII) {
@@ -191,12 +215,12 @@ public class CMDHandler {
             dataSocket.close();
             response(Statics.RETR_SUCC_RETURN);
         } catch (Exception e) {
-            logException(e);
             response(Statics.RETR_FAILED_RETURN);
+            throw e;
         }
     }
 
-    public void STOR(String args) {
+    public void STOR(String args) throws Exception {
         args = args.trim();
         try {
             Socket dataSocket = null;
@@ -223,14 +247,13 @@ public class CMDHandler {
             response(Statics.STOR_SUCC_RETURN);
 
         } catch (Exception e) {
-            logException(e);
             response(Statics.STOR_FAILED_RETURN);
+            throw e;
         }
     }
 
-    public void LIST(String args) {
+    public void LIST(String args) throws Exception {
         Socket dataSocket = null;
-        try {
             if (netMode == Statics.TRANSFER_MODE.PORT) {
                 dataSocket = new Socket(portHost, portPort);
             } else {
@@ -245,8 +268,5 @@ public class CMDHandler {
                 }
                 ostream.write(type.getBytes());
             }
-        } catch (Exception e) {
-            logException(e);
-        }
     }
 }

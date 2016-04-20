@@ -5,6 +5,8 @@ import com.ftpserver.logger.ConsoleLogger;
 
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by windr on 4/18/16.
@@ -25,25 +27,30 @@ public class ClientSocketThread extends Thread {
         this.client = client;
     }
 
-    public void onResponse(java.lang.String msg) {
-        try {
+    public void onResponse(java.lang.String msg) throws Exception {
             communicationInstance.send(client, msg.toCharArray());
-        } catch (Exception e) {
-            ConsoleLogger.info(String.valueOf(System.currentTimeMillis()));
-            ConsoleLogger.error(e.toString());
-            ConsoleLogger.error(e.getMessage());
-            e.printStackTrace(System.out);
-        }
+    }
+
+    private void logException(Exception e) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ConsoleLogger.error(df.format(new Date()));
+        ConsoleLogger.error(e.toString());
+        ConsoleLogger.error(e.getMessage());
+        e.printStackTrace(System.out);
     }
 
     @Override
     public void run() {
+        int errorCount = 0;
             while (true) {
                 try {
+                    if (errorCount > 10) {
+                        handler.cleanUp();
+                        client.close();
+                    }
                     String cmd = new String(communicationInstance.read(client));
                     String[] params = cmd.split(" ");
                     String op = params[0];
-                    ConsoleLogger.info(client.toString());
                     cmd = "";
                     for (int i = 1; i < params.length; i++) {
                         cmd += params[i];
@@ -51,15 +58,18 @@ public class ClientSocketThread extends Thread {
 
                     Method handle = handler.getClass().getMethod(op.trim(), String.class);
                     handle.invoke(handler, cmd);
+                    errorCount = 0;
                     if (op.equals("QUIT")) {
                         client.close();
                         ConsoleLogger.info("CLOSE ON " + client.toString());
                         break;
                     }
                 } catch (Exception e) {
-                    ConsoleLogger.error(e.getMessage());
-                    e.printStackTrace();
-
+                    if (errorCount > 10) {
+                        return;
+                    }
+                    logException(e);
+                    errorCount++;
                 }
         }
 
