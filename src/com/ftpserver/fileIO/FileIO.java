@@ -45,6 +45,10 @@ public class FileIO {
         bw.close();
     }
 
+    public boolean isDir(String path) throws Exception {
+        return new File(Config.getInstance().getRoot() + path).isDirectory();
+    }
+
     public boolean exist(String path) {
         File file = new File(Config.getInstance().getRoot() + path);
         return file.exists();
@@ -53,5 +57,9 @@ public class FileIO {
     public BufferedReader open(String path) throws Exception {
         File file = new File(Config.getInstance().getRoot() + path);
         return new BufferedReader(new FileReader(file));
+    }
+
+    public String[] lsdir(String path) throws Exception {
+        return new File(Config.getInstance().getRoot() + path).list();
     }
 }

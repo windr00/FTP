@@ -213,6 +213,24 @@ public class CMDHandler {
     }
 
     public void LIST(String args) {
-
+        Socket dataSocket = null;
+        try {
+            if (netMode == Statics.TRANSFER_MODE.PORT) {
+                dataSocket = new Socket(portHost, portPort);
+            } else {
+                dataSocket = pasvSocket.accept();
+            }
+            String files[] = fileIOInstance.lsdir(currentPath);
+            OutputStream ostream = dataSocket.getOutputStream();
+            for (String i : files) {
+                String type = "- ";
+                if (fileIOInstance.isDir(i)) {
+                    type = "d ";
+                }
+                ostream.write(type.getBytes());
+            }
+        } catch (Exception e) {
+            logException(e);
+        }
     }
 }
