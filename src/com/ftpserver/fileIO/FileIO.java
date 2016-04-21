@@ -1,6 +1,8 @@
 package com.ftpserver.fileIO;
 
 import com.ftpserver.Config;
+import com.ftpserver.exceptions.FileIsDirectoryException;
+import com.ftpserver.exceptions.FileIsNotDirectoryException;
 
 import java.io.*;
 import java.net.URI;
@@ -19,6 +21,41 @@ public class FileIO {
             _instance = new FileIO();
         }
         return _instance;
+    }
+
+    public void rmfile(String path) throws Exception {
+        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
+        File file = new File(fullpath);
+        if (file.isDirectory()) {
+            throw new FileIsDirectoryException(path);
+        }
+        if (!file.delete()) {
+            throw new FileNotFoundException(path);
+        }
+    }
+
+    public void rmdir(String path) throws Exception {
+        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
+        File file = new File(fullpath);
+        if (!file.isDirectory()) {
+            throw new FileIsNotDirectoryException(path);
+        }
+        rcrmfile(file);
+    }
+
+    private void rcrmfile(File file) throws Exception {
+        File[] list = file.listFiles();
+        for (File f : list) {
+            if (f.isDirectory()) {
+                if (f.listFiles().length == 0) {
+                    f.delete();
+                } else {
+                    rcrmfile(f);
+                }
+            } else {
+                f.delete();
+            }
+        }
     }
 
     public byte[] read(String path) throws Exception {

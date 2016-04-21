@@ -52,6 +52,13 @@ public class Statics {
     public static final String ABOR_FAILED_RETURN = "500 NO TRANSFER GOING\n";
     public static final String MKD_SUCC_RETURN = "250 MKD SUCCESSFUL\n";
     public static final String MKD_FAILED_RETURN = "550 MKD FALIED\n";
+    public static final String MKD_EXIST_WARN_RETURN = "500 MKD FALIED ALREADY EXISTS\n";
+    public static final String DELE_SUCC_RETURN = "250 DELETE SUCCESSFUL\n";
+    public static final String DELE_FALIED_RETURN = "550 DELETE FALIED\n";
+    public static final String DELE_ISDIR_WARN_RETURN = "550 DELETE FALIED FILE IS A DIRECTORY\n";
+    public static final String RMD_SUCC_RETURN = "250 RM DIRECTORY SUCCESSFUL\n";
+    public static final String RMD_FALIED_RETURN = "250 RM DIRECTORY FALIED\n";
+    public static final String RMD_ISFILE_WARN_RETURN = "550 RM DIRECTORY FALIED FILE IS NOT A DICRECTORY\n";
 
 
     public enum NET_TRANSFER_TYPE {

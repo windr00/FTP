@@ -4,6 +4,8 @@ import com.ftpserver.Statics;
 import com.ftpserver.agent.UserLoginAgent;
 import com.ftpserver.event.Event;
 import com.ftpserver.event.EventHandler;
+import com.ftpserver.exceptions.FileIsDirectoryException;
+import com.ftpserver.exceptions.FileIsNotDirectoryException;
 import com.ftpserver.fileIO.FileIO;
 
 import java.io.FileInputStream;
@@ -13,7 +15,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.NoSuchElementException;
+import java.nio.file.FileAlreadyExistsException;
 
 /**
  * Created by windr on 4/19/16.
@@ -314,14 +316,46 @@ public class CMDHandler {
             fileIOInstance.mkDir(temp);
             response(Statics.MKD_SUCC_RETURN);
         } catch (Exception e) {
-            if (e.getClass() == NoSuchElementException.class) {
-                response(Statics.MKD_FAILED_RETURN);
+            if (e.getClass() == FileAlreadyExistsException.class) {
+                response(Statics.MKD_EXIST_WARN_RETURN);
             } else {
-                response(Statics.MKD_FAILED_RETURN + " ALREADY EXISTS\n");
+                response(Statics.MKD_FAILED_RETURN);
             }
+            throw e;
         }
 
     }
+
+    public void RMD(String args) throws Exception {
+        try {
+            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            fileIOInstance.rmdir(temp);
+            response(Statics.RMD_SUCC_RETURN);
+        } catch (Exception e) {
+            if (e.getClass() == FileIsNotDirectoryException.class) {
+                response(Statics.RMD_ISFILE_WARN_RETURN);
+            } else {
+                response(Statics.RMD_FALIED_RETURN);
+            }
+            throw e;
+        }
+    }
+
+    public void DELE(String args) throws Exception {
+        try {
+            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            fileIOInstance.rmfile(temp);
+            response(Statics.DELE_SUCC_RETURN);
+        } catch (Exception e) {
+            if (e.getClass() == FileIsDirectoryException.class) {
+                response(Statics.DELE_ISDIR_WARN_RETURN);
+            } else {
+                response(Statics.DELE_FALIED_RETURN);
+            }
+            throw e;
+        }
+    }
+
 
     public void ABOR(String args) throws Exception {
         if (dataSocket.isConnected()) {
