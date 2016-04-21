@@ -41,6 +41,9 @@ public class FileIO {
             throw new FileIsNotDirectoryException(path);
         }
         rcrmfile(file);
+        if (!file.delete()) {
+            throw new FileNotFoundException(path);
+        }
     }
 
     private void rcrmfile(File file) throws Exception {
@@ -74,14 +77,20 @@ public class FileIO {
         return sb.toString().getBytes();
     }
 
-    public void write(String path, byte[] content, int length) throws Exception {
+    public void create(String path) throws Exception {
         File file = new File(appendFilePath(Config.getInstance().getRoot(), path));
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
-        } else {
-            if (!file.createNewFile()) {
-                throw new NoSuchFileException(path);
-            }
+        }
+        if (!file.createNewFile()) {
+            throw new FileNotFoundException(path);
+        }
+    }
+
+    public void write(String path, byte[] content, int length) throws Exception {
+        File file = new File(appendFilePath(Config.getInstance().getRoot(), path));
+        if (!file.exists()) {
+            throw new FileNotFoundException(path);
         }
         FileOutputStream fos = new FileOutputStream(file);
         fos.write(content, 0, length);
@@ -91,11 +100,11 @@ public class FileIO {
     public void mkDir(String path) throws Exception {
         String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
         File file = new File(fullpath);
-        if (!file.mkdir()) {
-            throw new NoSuchFileException(path);
-        }
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
+        }
+        if (!file.mkdir()) {
+            throw new NoSuchFileException(path);
         }
 
 

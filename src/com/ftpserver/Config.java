@@ -6,7 +6,7 @@ package com.ftpserver;
 public class Config {
 
     private static Config _instance;
-    private String root = "/Users/windr/";
+    private String root = "/";
 
     private String lsCMD = "/bin/ls -l ";
 

@@ -100,8 +100,13 @@ public class CMDHandler {
     public void CWD(String args) throws Exception {
 
         try {
-            String temp = fileIOInstance.appendFilePath(currentPath, args);
-            temp = fileIOInstance.cddir(temp);
+            String temp = "";
+            if (args.startsWith("/")) {
+                temp = fileIOInstance.cddir(args);
+            } else {
+                temp = fileIOInstance.appendFilePath(currentPath, args);
+                temp = fileIOInstance.cddir(temp);
+            }
             response(Statics.CWD_SUCC_RETURN);
             currentPath = temp;
         } catch (Exception e) {
@@ -253,8 +258,9 @@ public class CMDHandler {
     public void RETR(String args) throws Exception {
         try {
             String filepath = args.trim();
+            String temp = fileIOInstance.appendFilePath(currentPath, filepath);
             setDataSocket();
-            FileInputStream filereader = fileIOInstance.open(filepath);
+            FileInputStream filereader = fileIOInstance.open(temp);
             byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             OutputStream ostream = dataSocket.getOutputStream();
             int current_length = 0;
@@ -296,6 +302,7 @@ public class CMDHandler {
             } else {
                 response(Statics.STOR_STRART_I_RETURN);
             }
+            fileIOInstance.create(fileIOInstance.appendFilePath(currentPath, args));
             while ((amount = istream.read(buffer)) != -1) {
 
                 fileIOInstance.write(fileIOInstance.appendFilePath(currentPath, args), buffer, amount);
@@ -379,7 +386,7 @@ public class CMDHandler {
 //                ostream.write(type.getBytes());
 //            }
             String str = fileIOInstance.lsdir(currentPath);
-            ostream.write(str.getBytes());
+            ostream.write(parseReturnChar(str.getBytes(), str.getBytes().length));
             response(Statics.LIST_SUCC_RETURN);
             dataSocket.close();
         } catch (Exception e) {
