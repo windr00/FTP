@@ -33,6 +33,8 @@ public class CMDHandler {
 
     private ServerSocket pasvSocket = null;
 
+    private Socket dataSocket = null;
+
     private String currentPath = "/";
 
     private FileIO fileIOInstance = FileIO.getInstance();
@@ -155,6 +157,17 @@ public class CMDHandler {
         }
     }
 
+    private void setDataSocket() throws Exception {
+        pasvSocket.setSoTimeout(0);
+        if (netMode == Statics.TRANSFER_MODE.PORT) {
+            dataSocket = new Socket(this.portHost, this.portPort);
+        } else {
+            if (dataSocket == null) {
+                dataSocket = pasvSocket.accept();
+            }
+        }
+    }
+
     public void PASV(String args) throws Exception {
         try {
             if (pasvSocket != null) {
@@ -164,7 +177,17 @@ public class CMDHandler {
             pasvSocket = new ServerSocket(p);
             String ip = InetAddress.getLocalHost().getHostAddress().replace('.', ',');
             String port = String.valueOf(p / 256) + "," + String.valueOf(p % 256);
+            netMode = Statics.TRANSFER_MODE.PASV;
             response(Statics.PASV_SUCC_RETURN + ip + "," + port + ")\n");
+            pasvSocket.setSoTimeout(1000);
+            if (dataSocket != null) {
+                dataSocket.close();
+            }
+            try {
+                dataSocket = pasvSocket.accept();
+            } catch (Exception e) {
+                return;
+            }
         } catch (Exception e) {
             response(Statics.PASV_FAILED_RETURN);
             throw e;
@@ -184,12 +207,7 @@ public class CMDHandler {
     public void RETR(String args) throws Exception {
         try {
             String filepath = args.trim();
-            Socket dataSocket = null;
-            if (netMode == Statics.TRANSFER_MODE.PORT) {
-                dataSocket = new Socket(this.portHost, this.portPort);
-            } else {
-                dataSocket = pasvSocket.accept();
-            }
+            setDataSocket();
             BufferedReader filereader = fileIOInstance.open(filepath);
             char buffer[] = new char[Statics.FILE_READ_BUFFER_LENGTH];
             OutputStream ostream = dataSocket.getOutputStream();
@@ -212,7 +230,7 @@ public class CMDHandler {
             }
             ostream.close();
             filereader.close();
-            dataSocket.close();
+            //dataSocket.close();
             response(Statics.RETR_SUCC_RETURN);
         } catch (Exception e) {
             response(Statics.RETR_FAILED_RETURN);
@@ -223,13 +241,7 @@ public class CMDHandler {
     public void STOR(String args) throws Exception {
         args = args.trim();
         try {
-            Socket dataSocket = null;
-            if (netMode == Statics.TRANSFER_MODE.PORT) {
-                dataSocket = new Socket(portHost, portPort);
-            } else {
-                dataSocket = pasvSocket.accept();
-            }
-
+            setDataSocket();
             InputStream istream = dataSocket.getInputStream();
             byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
             int amount = 0;
@@ -243,7 +255,7 @@ public class CMDHandler {
                 fileIOInstance.write(args, new String(buffer).toCharArray(), amount);
             }
             istream.close();
-            dataSocket.close();
+            //dataSocket.close();
             response(Statics.STOR_SUCC_RETURN);
 
         } catch (Exception e) {
@@ -253,20 +265,25 @@ public class CMDHandler {
     }
 
     public void LIST(String args) throws Exception {
-        Socket dataSocket = null;
-            if (netMode == Statics.TRANSFER_MODE.PORT) {
-                dataSocket = new Socket(portHost, portPort);
-            } else {
-                dataSocket = pasvSocket.accept();
-            }
-            String files[] = fileIOInstance.lsdir(currentPath);
+        try {
+            response(Statics.LIST_START_RETURN);
+            setDataSocket();
             OutputStream ostream = dataSocket.getOutputStream();
-            for (String i : files) {
-                String type = "- ";
-                if (fileIOInstance.isDir(i)) {
-                    type = "d ";
-                }
-                ostream.write(type.getBytes());
-            }
+//            for (String i : files) {
+//                String type = "- ";
+//                if (fileIOInstance.isDir(i)) {
+//                    type = "d ";
+//                }
+//                ostream.write(type.getBytes());
+//            }
+            String str = fileIOInstance.lsdir(currentPath);
+            ostream.write(str.getBytes());
+            response(Statics.LIST_SUCC_RETURN);
+            dataSocket.close();
+        } catch (Exception e) {
+            response(Statics.LIST_FAILED_RETURN);
+            throw e;
+        }
     }
+
 }

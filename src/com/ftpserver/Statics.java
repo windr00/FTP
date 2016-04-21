@@ -43,6 +43,8 @@ public class Statics {
     public static final String STOR_STRART_A_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.\n";
     public static final String STOR_STRART_I_RETURN = "150 OPENING BINARY MODE DATA CONNECTION.\n";
     public static final String LIST_START_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.\n";
+    public static final String LIST_FAILED_RETURN = "500 LIST ERROR\n";
+    public static final String LIST_SUCC_RETURN = "226 LIST TRANSFER COMPLETE\n";
 
 
     public enum NET_TRANSFER_TYPE {

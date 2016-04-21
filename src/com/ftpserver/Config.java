@@ -5,15 +5,24 @@ package com.ftpserver;
  */
 public class Config {
 
-
     private static Config _instance;
     private String root = "";
+
+    private String lsCMD = "C:\\Program Files\\Git\\usr\\bin\\ls.exe -l ";
 
     public static Config getInstance() {
         if (_instance == null) {
             _instance = new Config();
         }
         return _instance;
+    }
+
+    public String getLsCMD() {
+        return lsCMD;
+    }
+
+    public void setLsCMD(String lsCMD) {
+        this.lsCMD = lsCMD;
     }
 
     public String getRoot() {

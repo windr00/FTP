@@ -59,7 +59,15 @@ public class FileIO {
         return new BufferedReader(new FileReader(file));
     }
 
-    public String[] lsdir(String path) throws Exception {
-        return new File(Config.getInstance().getRoot() + path).list();
+    public String lsdir(String path) throws Exception {
+        String ret = "";
+        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + Config.getInstance().getRoot() + path);
+        InputStream istream = p.getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(istream));
+        String aline = "";
+        while ((aline = br.readLine()) != null) {
+            ret += aline + "\n";
+        }
+        return ret;
     }
 }
