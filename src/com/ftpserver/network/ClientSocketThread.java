@@ -1,5 +1,6 @@
 package com.ftpserver.network;
 
+import com.ftpserver.Statics;
 import com.ftpserver.commandhandler.CMDHandler;
 import com.ftpserver.logger.ConsoleLogger;
 
@@ -55,9 +56,18 @@ public class ClientSocketThread extends Thread {
                     for (int i = 1; i < params.length; i++) {
                         cmd += params[i];
                     }
+                    try {
+                        Method handle = handler.getClass().getMethod(op.trim(), String.class);
 
-                    Method handle = handler.getClass().getMethod(op.trim(), String.class);
-                    handle.invoke(handler, cmd);
+                        handle.invoke(handler, cmd);
+                    } catch (NoSuchMethodException e) {
+
+                        try {
+                            onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                        } catch (Exception ex) {
+                            logException(ex);
+                        }
+                    }
                     errorCount = 0;
                     if (op.equals("QUIT")) {
                         client.close();

@@ -6,13 +6,14 @@ import com.ftpserver.event.Event;
 import com.ftpserver.event.EventHandler;
 import com.ftpserver.fileIO.FileIO;
 
-import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 
 /**
  * Created by windr on 4/19/16.
@@ -95,16 +96,37 @@ public class CMDHandler {
     }
 
     public void CWD(String args) throws Exception {
-        if (fileIOInstance.exist(args)) {
-            currentPath = args;
+
+        try {
+            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            temp = fileIOInstance.cddir(temp);
             response(Statics.CWD_SUCC_RETURN);
-        } else {
+            currentPath = temp;
+        } catch (Exception e) {
             response(Statics.CWD_FAILED_RETURN);
+            throw e;
+        }
+    }
+
+    public void CDUP(String args) throws Exception {
+        try {
+            if (currentPath.equals("/")) {
+                response(Statics.CDUP_SUCC_RETURN);
+                return;
+            }
+
+            currentPath = fileIOInstance.appendFilePath(currentPath, "../");
+            currentPath = fileIOInstance.cddir(currentPath);
+            response(Statics.CDUP_SUCC_RETURN);
+
+        } catch (Exception e) {
+            response(Statics.CDUP_FAILED_RETURN);
+            throw e;
         }
     }
 
     public void PWD(String args) throws Exception {
-        response(Statics.PWD_RETURN + "\"" + currentPath + "\"\n");
+        response(Statics.PWD_RETURN + "\"/" + currentPath + "\"\n");
     }
 
     public void SYST(String args) throws Exception {
@@ -194,22 +216,44 @@ public class CMDHandler {
         }
     }
 
-    private byte[] parseReturnChar(byte[] buffer) {
-        String str = new String(buffer);
-        for (int i = 0; i < buffer.length; i++) {
-            if (buffer[i] == '\r') {
-                str = str.substring(0, i - 1) + str.substring(i + 1);
+    private byte[] parseReturnChar(byte[] buffer, int originalLength) {
+//        List<Byte> blist = new ArrayList<>();
+//        for (int i = 0;i < buffer.length;i++) {
+//            blist.add(buffer[i]);
+//        }
+//        byte r = '\r';
+//        blist.remove(new Byte(r));
+//        byte b[] = new byte[blist.size()];
+//        for (int i = 0;i < b.length;i++) {
+//            b[i] = blist.get(i);
+//        }
+//        return b;
+        byte ret[] = new byte[originalLength];
+        int k = 0;
+        for (int i = 0; i < originalLength; i++) {
+            if (buffer[i] != '\r') {
+                ret[k] = buffer[i];
+                k++;
             }
         }
-        return str.getBytes();
+//        byte ret[] = new byte[originalLength];
+//        for (int i = 0;i < originalLength;i++) {
+//            ret[i] = buffer[i];
+//        }
+//        return ret;
+        buffer = new byte[k];
+        for (int i = 0; i < k; i++) {
+            buffer[i] = ret[i];
+        }
+        return buffer;
     }
 
     public void RETR(String args) throws Exception {
         try {
             String filepath = args.trim();
             setDataSocket();
-            BufferedReader filereader = fileIOInstance.open(filepath);
-            char buffer[] = new char[Statics.FILE_READ_BUFFER_LENGTH];
+            FileInputStream filereader = fileIOInstance.open(filepath);
+            byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             OutputStream ostream = dataSocket.getOutputStream();
             int current_length = 0;
             if (netType == Statics.TRANSFER_TYPE.ASCII) {
@@ -219,14 +263,14 @@ public class CMDHandler {
             }
 
             while ((current_length = filereader.read(buffer)) != -1) {
-                byte b[] = new String(buffer).getBytes();
                 if (netType == Statics.TRANSFER_TYPE.ASCII) {
-                    b = parseReturnChar(b);
-                    int minus = Statics.FILE_READ_BUFFER_LENGTH - b.length;
-                    current_length -= minus;
+                    buffer = parseReturnChar(buffer, current_length);
+//                    int minus = Statics.FILE_READ_BUFFER_LENGTH - buffer.length;
+                    current_length = buffer.length;
 
                 }
-                ostream.write(b, 0, current_length);
+                ostream.write(buffer, 0, current_length);
+                buffer = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             }
             ostream.close();
             filereader.close();
@@ -252,7 +296,7 @@ public class CMDHandler {
             }
             while ((amount = istream.read(buffer)) != -1) {
 
-                fileIOInstance.write(args, new String(buffer).toCharArray(), amount);
+                fileIOInstance.write(fileIOInstance.appendFilePath(currentPath, args), buffer, amount);
             }
             istream.close();
             //dataSocket.close();
@@ -261,6 +305,30 @@ public class CMDHandler {
         } catch (Exception e) {
             response(Statics.STOR_FAILED_RETURN);
             throw e;
+        }
+    }
+
+    public void MKD(String args) throws Exception {
+        try {
+            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            fileIOInstance.mkDir(temp);
+            response(Statics.MKD_SUCC_RETURN);
+        } catch (Exception e) {
+            if (e.getClass() == NoSuchElementException.class) {
+                response(Statics.MKD_FAILED_RETURN);
+            } else {
+                response(Statics.MKD_FAILED_RETURN + " ALREADY EXISTS\n");
+            }
+        }
+
+    }
+
+    public void ABOR(String args) throws Exception {
+        if (dataSocket.isConnected()) {
+            dataSocket.close();
+            response(Statics.ABOR_SUCC_RETURN);
+        } else {
+            response(Statics.ABOR_FAILED_RETURN);
         }
     }
 

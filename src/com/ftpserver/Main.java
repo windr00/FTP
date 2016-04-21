@@ -23,7 +23,7 @@ public class Main {
         try {
             Communication communication = Communication.getInstance();
             //communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
-            communication.bind(1026, 3);
+            communication.bind(1025, 3);
             while (true) {
                 Socket client = communication.accept();
                 communication.send(client, Statics.INIT_RETURN.toCharArray());

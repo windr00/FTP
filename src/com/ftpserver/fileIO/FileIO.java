@@ -3,6 +3,9 @@ package com.ftpserver.fileIO;
 import com.ftpserver.Config;
 
 import java.io.*;
+import java.net.URI;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.NoSuchFileException;
 
 /**
  * Created by windr on 4/19/16.
@@ -34,15 +37,31 @@ public class FileIO {
         return sb.toString().getBytes();
     }
 
-    public void write(String path, char[] content, int length) throws Exception {
-        File file = new File(Config.getInstance().getRoot() + path);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        char[] c = new char[length];
-        for (int i = 0; i < length; i++) {
-            c[i] = content[i];
+    public void write(String path, byte[] content, int length) throws Exception {
+        File file = new File(appendFilePath(Config.getInstance().getRoot(), path));
+        if (file.exists()) {
+            throw new FileAlreadyExistsException(path);
+        } else {
+            if (!file.createNewFile()) {
+                throw new NoSuchFileException(path);
+            }
         }
-        bw.write(c);
-        bw.close();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(content, 0, length);
+        fos.close();
+    }
+
+    public void mkDir(String path) throws Exception {
+        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
+        File file = new File(fullpath);
+        if (!file.mkdir()) {
+            throw new NoSuchFileException(path);
+        }
+        if (file.exists()) {
+            throw new FileAlreadyExistsException(path);
+        }
+
+
     }
 
     public boolean isDir(String path) throws Exception {
@@ -50,24 +69,97 @@ public class FileIO {
     }
 
     public boolean exist(String path) {
-        File file = new File(Config.getInstance().getRoot() + path);
-        return file.exists();
+        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
+        File file = new File(uri);
+        return file.exists() && file.isDirectory();
     }
 
-    public BufferedReader open(String path) throws Exception {
+    public FileInputStream open(String path) throws Exception {
         File file = new File(Config.getInstance().getRoot() + path);
-        return new BufferedReader(new FileReader(file));
+        return new FileInputStream(file);
+    }
+
+    public String cddir(String path) throws Exception {
+//        Process p = Runtime.getRuntime().exec(Config.getInstance().getCdCMD() + Config.getInstance().getRoot() + path + ";" + Config.getInstance().getPwdCMD());
+//        InputStream istream = p.getInputStream();
+//        BufferedReader br = new BufferedReader(new InputStreamReader(istream));
+//        String result = br.readLine();
+//
+//        if (br.readLine() != null){
+//            br.close();
+//            istream.close();
+//            throw new NoSuchFileException(path);
+//        }
+//        istream.close();
+//        br.close();
+//        p.destroy();
+//        result = appendStash(result);
+//        if (result.startsWith(Config.getInstance().getRoot())) {
+//            return result.substring(Config.getInstance().getRoot().length());
+//        }
+//        else {
+//            throw new NoSuchFileException(path);
+//        }
+
+        path = appendFilePath(Config.getInstance().getRoot(), path);
+        String pathcuts[] = path.split("/");
+        for (int i = 0; i < pathcuts.length; i++) {
+            if (pathcuts[i].equals("..")) {
+                pathcuts[i] = "";
+                for (int j = i - 1; j > 0; j++) {
+                    if (!pathcuts[j].equals("")) {
+                        pathcuts[j] = "";
+                        break;
+                    }
+                }
+            }
+        }
+        String result = "/";
+        for (int i = 0; i < pathcuts.length; i++) {
+            if (!pathcuts[i].equals("")) {
+                result += pathcuts[i] + "/";
+            }
+        }
+        if (!result.startsWith(appendStash(Config.getInstance().getRoot()))) {
+            throw new FileNotFoundException(path);
+        } else {
+            return appendStash(result.substring(Config.getInstance().getRoot().length()));
+        }
     }
 
     public String lsdir(String path) throws Exception {
         String ret = "";
-        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + Config.getInstance().getRoot() + path);
+        path = appendFilePath(Config.getInstance().getRoot(), path);
+        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + path);
+        System.out.println(path);
         InputStream istream = p.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
-        String aline = "";
-        while ((aline = br.readLine()) != null) {
-            ret += aline + "\n";
+        String result = "";
+        while ((result = br.readLine()) != null) {
+            ret += result + "\n";
         }
+        br.close();
+        istream.close();
         return ret;
+    }
+
+    public String appendFilePath(String currentpath, String newPath) {
+        if (!currentpath.endsWith("/")) {
+            currentpath = currentpath.concat("/");
+        }
+        if (!newPath.endsWith("/")) {
+            newPath = newPath.concat("/");
+        }
+        if (newPath.startsWith("/")) {
+            newPath = newPath.substring(1);
+        }
+        return currentpath.concat(newPath);
+    }
+
+    public String appendStash(String path) {
+        if (!path.endsWith("/")) {
+            path = path.concat("/");
+        }
+        return path;
     }
 }

@@ -15,6 +15,7 @@ public class Statics {
 //    λ	端口定义命令包括PORT和PASV;
 //    λ	文件传送命令：RETR、STOR、APPE、STOU、ALLO、REST和STAT；
 //    λ	杂项命令：HELP、NOOP、SITE和SYST
+    public static final String COMMAND_NOT_UNDERSTOOD_RETURN = "500 COMMAND NOT UNDERSTOOD\n";
     public static final String INIT_RETURN = "220 SERVICE READY\n";
     public static final String AUTH_RETURN = "500 LTS NOT SUPPORTED\n";
     public static final String SYST_RETURN = "215 UNIX TYPE: L8\n";
@@ -22,10 +23,10 @@ public class Statics {
     public static final String OPTS_RETURN = "200 OPTS UTF8 IS SET TO ON.\n";
     public static final String USER_RETURN = "331 NEED PASSWORD.\n";
     public static final String PASS_LOGEDIN_RETURN = "230 WELCOME !\n";
-    public static final String PASS_FAILED_RETURN = "\n";
+    public static final String PASS_FAILED_RETURN = "530 LOGIN OR PASSWORD INCORRECT\n";
     public static final String QUIT_RETURN = "221 GOOD BYE!\n";
     public static final String TYPE_RETURN = "200 TYPE SET TO ";
-    public static final String TYPE_FAILED_RETURN = "";
+    public static final String TYPE_FAILED_RETURN = "501 WRONG TYPE\n";
     public static final String NOOP_RETURN = "200 NOOP OK.\n";
     public static final String CWD_SUCC_RETURN = "250 CWD SUCCESSFUL.\n";
     public static final String CWD_FAILED_RETURN = "550 CWD FILED\n";
@@ -45,6 +46,12 @@ public class Statics {
     public static final String LIST_START_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.\n";
     public static final String LIST_FAILED_RETURN = "500 LIST ERROR\n";
     public static final String LIST_SUCC_RETURN = "226 LIST TRANSFER COMPLETE\n";
+    public static final String CDUP_SUCC_RETURN = "250 CDUP SUCCESSFUL\n";
+    public static final String CDUP_FAILED_RETURN = "500 CDUP FAILED\n";
+    public static final String ABOR_SUCC_RETURN = "200 TRANSFER ABORT!\n";
+    public static final String ABOR_FAILED_RETURN = "500 NO TRANSFER GOING\n";
+    public static final String MKD_SUCC_RETURN = "250 MKD SUCCESSFUL\n";
+    public static final String MKD_FAILED_RETURN = "550 MKD FALIED\n";
 
 
     public enum NET_TRANSFER_TYPE {

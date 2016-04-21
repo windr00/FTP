@@ -6,15 +6,33 @@ package com.ftpserver;
 public class Config {
 
     private static Config _instance;
-    private String root = "";
+    private String root = "/Users/windr/";
 
-    private String lsCMD = "C:\\Program Files\\Git\\usr\\bin\\ls.exe -l ";
+    private String lsCMD = "/bin/ls -l ";
+    private String cdCMD = "/usr/bin/cd ";
+    private String pwdCMD = "/bin/pwd";
 
     public static Config getInstance() {
         if (_instance == null) {
             _instance = new Config();
         }
         return _instance;
+    }
+
+    public String getCdCMD() {
+        return cdCMD;
+    }
+
+    public void setCdCMD(String cdCMD) {
+        this.cdCMD = cdCMD;
+    }
+
+    public String getPwdCMD() {
+        return pwdCMD;
+    }
+
+    public void setPwdCMD(String pwdCMD) {
+        this.pwdCMD = pwdCMD;
     }
 
     public String getLsCMD() {
