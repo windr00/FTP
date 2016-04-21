@@ -5,7 +5,6 @@ import com.ftpserver.exceptions.FileIsDirectoryException;
 import com.ftpserver.exceptions.FileIsNotDirectoryException;
 
 import java.io.*;
-import java.net.URI;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 
@@ -92,8 +91,13 @@ public class FileIO {
         if (!file.exists()) {
             throw new FileNotFoundException(path);
         }
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(content, 0, length);
+        FileOutputStream fos = new FileOutputStream(file, true);
+        byte buffer[] = new byte[length];
+        for (int i = 0; i < length; i++) {
+            buffer[i] = content[i];
+        }
+        fos.write(buffer);
+        //fos.write(content, 0, length);
         fos.close();
     }
 
@@ -115,7 +119,8 @@ public class FileIO {
     }
 
     public boolean exist(String path) {
-        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
+        String uri = appendFilePath(Config.getInstance().getRoot(), path);
+//        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
         File file = new File(uri);
         return file.exists() && file.isDirectory();
     }

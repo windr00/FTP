@@ -20,7 +20,8 @@ public class Statics {
     public static final String AUTH_RETURN = "500 LTS NOT SUPPORTED\n";
     public static final String SYST_RETURN = "215 UNIX TYPE: L8\n";
     public static final String FEAT_RETURN = "211-FEATURES SUPPORTED\nUTF8\n211 END\n";
-    public static final String OPTS_RETURN = "200 OPTS UTF8 IS SET TO ON.\n";
+    public static final String OPTS_UTF8_ON_RETURN = "200 OPTS UTF8 IS SET TO ON.\n";
+    public static final String OPTS_UTF8_OFF_RETURN = "200 OPTS UTF8 IS SET TO OFF.\n";
     public static final String USER_RETURN = "331 NEED PASSWORD.\n";
     public static final String PASS_LOGEDIN_RETURN = "230 WELCOME !\n";
     public static final String PASS_FAILED_RETURN = "530 LOGIN OR PASSWORD INCORRECT\n";
@@ -40,7 +41,7 @@ public class Statics {
     public static final String RETR_SUCC_RETURN = "226 TRANSFER COMPLETE\n";
     public static final String RETR_FAILED_RETURN = "550 FILE NOT FOUND OR ACCESS DENIED.\n";
     public static final String STOR_SUCC_RETURN = "226 TRANSFER COMPLETE\n";
-    public static final String STOR_FAILED_RETURN = "550 FILE NOT FOUND OR ACCESS DENIED.\n";
+    public static final String STOR_FAILED_RETURN = "550 FILE ALREADY EXISTS OR ACCESS DENIED.\n";
     public static final String STOR_STRART_A_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.\n";
     public static final String STOR_STRART_I_RETURN = "150 OPENING BINARY MODE DATA CONNECTION.\n";
     public static final String LIST_START_RETURN = "150 OPENING ASCII MODE DATA CONNECTION.\n";

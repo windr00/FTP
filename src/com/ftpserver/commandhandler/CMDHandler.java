@@ -26,6 +26,8 @@ public class CMDHandler {
 
     private boolean isloggedin = false;
 
+    private boolean useUTF8 = false;
+
     private Statics.TRANSFER_TYPE netType;
 
     private Statics.TRANSFER_MODE netMode;
@@ -145,7 +147,16 @@ public class CMDHandler {
     }
 
     public void OPTS(String args) throws Exception {
-        response(Statics.OPTS_RETURN);
+        if (args.contains("UTF8")) {
+            if (args.contains("ON")) {
+                response(Statics.OPTS_UTF8_ON_RETURN);
+                useUTF8 = true;
+            } else if (args.contains("OFF")) {
+                response(Statics.OPTS_UTF8_OFF_RETURN);
+                useUTF8 = false;
+            }
+        }
+        response(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
     }
 
     public void PORT(String args) throws Exception {
@@ -294,6 +305,9 @@ public class CMDHandler {
         args = args.trim();
         try {
             setDataSocket();
+            if (fileIOInstance.exist(fileIOInstance.appendFilePath(currentPath, args))) {
+                throw new FileAlreadyExistsException(args);
+            }
             InputStream istream = dataSocket.getInputStream();
             byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
             int amount = 0;
@@ -303,9 +317,10 @@ public class CMDHandler {
                 response(Statics.STOR_STRART_I_RETURN);
             }
             fileIOInstance.create(fileIOInstance.appendFilePath(currentPath, args));
+            String file = fileIOInstance.appendFilePath(currentPath, args);
             while ((amount = istream.read(buffer)) != -1) {
 
-                fileIOInstance.write(fileIOInstance.appendFilePath(currentPath, args), buffer, amount);
+                fileIOInstance.write(file, buffer, amount);
             }
             istream.close();
             //dataSocket.close();
@@ -386,7 +401,14 @@ public class CMDHandler {
 //                ostream.write(type.getBytes());
 //            }
             String str = fileIOInstance.lsdir(currentPath);
-            ostream.write(parseReturnChar(str.getBytes(), str.getBytes().length));
+            byte buffer[];
+            if (useUTF8) {
+                buffer = str.getBytes("UTF8");
+            } else {
+                buffer = str.getBytes("GB2312");
+            }
+            buffer = parseReturnChar(buffer, buffer.length);
+            ostream.write(buffer);
             response(Statics.LIST_SUCC_RETURN);
             dataSocket.close();
         } catch (Exception e) {

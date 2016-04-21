@@ -23,7 +23,7 @@ public class Main {
         try {
             Communication communication = Communication.getInstance();
             //communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
-            communication.bind(1025, 3);
+            communication.bind(2120, 3);
             while (true) {
                 Socket client = communication.accept();
                 communication.send(client, Statics.INIT_RETURN.toCharArray());
@@ -32,7 +32,7 @@ public class Main {
             }
             // write your code here
         } catch (Exception e) {
-            ConsoleLogger.info(String.valueOf(System.currentTimeMillis()));
+            ConsoleLogger.error(df.format(new Date()));
             ConsoleLogger.error(e.toString());
             ConsoleLogger.error(e.getMessage());
         }
