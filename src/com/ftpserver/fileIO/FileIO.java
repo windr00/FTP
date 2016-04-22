@@ -15,6 +15,9 @@ public class FileIO {
 
     private static FileIO _instance;
 
+    private FileIO() {
+    }
+
     public static FileIO getInstance() {
         if (_instance == null) {
             _instance = new FileIO();
@@ -53,7 +56,9 @@ public class FileIO {
                     rcrmfile(f);
                 }
             } else {
-                f.delete();
+                if (!f.delete()) {
+                    throw new FileNotFoundException(f.getAbsolutePath());
+                }
             }
         }
     }

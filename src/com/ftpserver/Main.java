@@ -14,17 +14,26 @@ public class Main {
     public static void main(String[] args) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ConsoleLogger.info(df.format(new Date()));
+        Config configInstance = Config.getInstance();
+        Communication communication = Communication.getInstance();
+        //communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
         try {
-            //Config.getInstance().init("/Users/windr/Desktop/");
-            ConsoleLogger.info("FTP Service started on " + InetAddress.getLocalHost().getHostAddress());
+            configInstance.init("/Users/windr/Desktop/ls.json");
+
+            //Config.getInstance().saveSettings("/Users/windr/Desktop/ls.json");
+
+            communication.bind(configInstance.getCmdPort(), configInstance.getMaxConnection());
+            ConsoleLogger.info("FTP Service started on " + "\"" + configInstance.getRoot() + "\"@" + InetAddress.getLocalHost().getHostAddress() + ":" + configInstance.getCmdPort());
+
         } catch (Exception e) {
+            ConsoleLogger.error(df.format(new Date()));
+            ConsoleLogger.error(e.toString());
+            ConsoleLogger.error(e.getMessage());
+            e.printStackTrace();
             ConsoleLogger.error("FTP Service init failed");
         }
         //System.out.print("Hello World");
         try {
-            Communication communication = Communication.getInstance();
-            //communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
-            communication.bind(2120, 3);
             while (true) {
                 Socket client = communication.accept();
                 communication.send(client, Statics.INIT_RETURN.getBytes());

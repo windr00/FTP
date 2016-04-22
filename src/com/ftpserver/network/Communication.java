@@ -21,7 +21,7 @@ public class Communication {
 
     private int commandPort;
 
-    public Communication() {
+    private Communication() {
         this.eventHandler = new EventHandler();
     }
 

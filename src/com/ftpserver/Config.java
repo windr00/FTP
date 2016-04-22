@@ -1,6 +1,7 @@
 package com.ftpserver;
 
 import com.ftpserver.fileIO.FileIO;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
@@ -27,19 +28,29 @@ public class Config {
     }
 
     public void init(String path) throws Exception {
-        byte[] jstring = fileIOInstance.read(path);
-        JSONObject jsonObject = new JSONObject();
-        JSONObject.fromObject(jstring);
-        this.cmdPort = jsonObject.getInt("cmdPort");
-        this.maxConnection = jsonObject.getInt("maxConnection");
+        String jstring = new String(fileIOInstance.read(path));
+        JSONArray jsonArray = JSONArray.fromObject(jstring);
+        JSONObject jsonObject = jsonArray.getJSONObject(0);
+        this.cmdPort = Integer.parseInt(jsonObject.getString("cmdPort"));
+        this.maxConnection = Integer.parseInt(jsonObject.getString("maxConnection"));
         this.root = jsonObject.getString("ftpRoot");
         this.lsCMD = jsonObject.getString("lsCMD");
-
     }
 
-    public void saveSettings() throws Exception {
+    public void saveSettings(String path) throws Exception {
         JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
 
+        jsonObject.put("cmdPort", String.valueOf(this.cmdPort));
+        jsonObject.put("maxConnection", String.valueOf(this.maxConnection));
+        jsonObject.put("ftpRoot", this.root);
+        jsonObject.put("lsCMD", this.lsCMD);
+        jsonArray.add(0, jsonObject);
+        byte[] buffer = jsonArray.toString().getBytes();
+        if (!fileIOInstance.exist(path)) {
+            fileIOInstance.create(path);
+        }
+        fileIOInstance.write(path, buffer, buffer.length);
     }
 
     public int getCmdPort() {
