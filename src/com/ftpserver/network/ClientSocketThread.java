@@ -67,6 +67,7 @@ public class ClientSocketThread extends Thread {
                     }
                 }
                 if (op.equals("QUIT")) {
+                    handler.cleanUp();
                     client.close();
                     ConsoleLogger.info("CLOSE ON " + client.toString());
                     break;
