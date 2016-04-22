@@ -8,11 +8,12 @@ import com.ftpserver.event.EventHandler;
 import com.ftpserver.exceptions.FileIsDirectoryException;
 import com.ftpserver.exceptions.FileIsNotDirectoryException;
 import com.ftpserver.fileIO.FileIO;
+import com.ftpserver.network.Communication;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -43,7 +44,11 @@ public class CMDHandler {
 
     private String currentPath = "/";
 
+    private String renameFile = "";
+
     private FileIO fileIOInstance = FileIO.getInstance();
+
+    private Communication commInstance = Communication.getInstance();
 
     private EventHandler onResponseEventHandler;
 
@@ -104,6 +109,9 @@ public class CMDHandler {
 
         try {
             String temp = "";
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
             if (args.startsWith("/")) {
                 temp = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), args));
             } else {
@@ -136,7 +144,10 @@ public class CMDHandler {
     }
 
     public void PWD(String args) throws Exception {
-        response(Statics.PWD_RETURN + "\"/" + currentPath + "\"\n");
+        if (!currentPath.startsWith("/")) {
+            currentPath = "/" + currentPath;
+        }
+        response(Statics.PWD_RETURN + "\"" + currentPath + "\"\n");
     }
 
     public void SYST(String args) throws Exception {
@@ -148,6 +159,7 @@ public class CMDHandler {
     }
 
     public void OPTS(String args) throws Exception {
+        args = args.toUpperCase();
         if (args.contains("UTF8")) {
             if (args.contains("ON")) {
                 response(Statics.OPTS_UTF8_ON_RETURN);
@@ -156,8 +168,9 @@ public class CMDHandler {
                 response(Statics.OPTS_UTF8_OFF_RETURN);
                 useUTF8 = false;
             }
+        } else {
+            response(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
         }
-        response(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
     }
 
     public void PORT(String args) throws Exception {
@@ -203,7 +216,7 @@ public class CMDHandler {
         if (netMode == Statics.TRANSFER_MODE.PORT) {
             dataSocket = new Socket(this.portHost, this.portPort);
         } else {
-            if (dataSocket == null) {
+            if (dataSocket == null || dataSocket.isClosed()) {
                 dataSocket = pasvSocket.accept();
             }
         }
@@ -236,17 +249,6 @@ public class CMDHandler {
     }
 
     private byte[] parseReturnChar(byte[] buffer, int originalLength) {
-//        List<Byte> blist = new ArrayList<>();
-//        for (int i = 0;i < buffer.length;i++) {
-//            blist.add(buffer[i]);
-//        }
-//        byte r = '\r';
-//        blist.remove(new Byte(r));
-//        byte b[] = new byte[blist.size()];
-//        for (int i = 0;i < b.length;i++) {
-//            b[i] = blist.get(i);
-//        }
-//        return b;
         byte ret[] = new byte[originalLength];
         int k = 0;
         for (int i = 0; i < originalLength; i++) {
@@ -255,11 +257,6 @@ public class CMDHandler {
                 k++;
             }
         }
-//        byte ret[] = new byte[originalLength];
-//        for (int i = 0;i < originalLength;i++) {
-//            ret[i] = buffer[i];
-//        }
-//        return ret;
         buffer = new byte[k];
         for (int i = 0; i < k; i++) {
             buffer[i] = ret[i];
@@ -275,7 +272,6 @@ public class CMDHandler {
             setDataSocket();
             FileInputStream filereader = fileIOInstance.open(temp);
             byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
-            OutputStream ostream = dataSocket.getOutputStream();
             int current_length = 0;
             if (netType == Statics.TRANSFER_TYPE.ASCII) {
                 response(Statics.RETR_STRART_A_RETURN);
@@ -290,12 +286,11 @@ public class CMDHandler {
                     current_length = buffer.length;
 
                 }
-                ostream.write(buffer, 0, current_length);
+                commInstance.send(dataSocket, buffer);
                 buffer = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             }
-            ostream.close();
             filereader.close();
-            //dataSocket.close();
+            dataSocket.close();
             response(Statics.RETR_SUCC_RETURN);
         } catch (Exception e) {
             response(Statics.RETR_FAILED_RETURN);
@@ -306,6 +301,9 @@ public class CMDHandler {
     public void STOR(String args) throws Exception {
         args = args.trim();
         try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
             setDataSocket();
             if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)))) {
                 throw new FileAlreadyExistsException(args);
@@ -336,6 +334,9 @@ public class CMDHandler {
 
     public void MKD(String args) throws Exception {
         try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
             String temp = fileIOInstance.appendFilePath(currentPath, args);
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.mkDir(fullpath);
@@ -353,6 +354,9 @@ public class CMDHandler {
 
     public void RMD(String args) throws Exception {
         try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
             String temp = fileIOInstance.appendFilePath(currentPath, args);
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.rmdir(fullpath);
@@ -369,6 +373,9 @@ public class CMDHandler {
 
     public void DELE(String args) throws Exception {
         try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
             String temp = fileIOInstance.appendFilePath(currentPath, args);
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.rmfile(fullpath);
@@ -397,14 +404,6 @@ public class CMDHandler {
         try {
             response(Statics.LIST_START_RETURN);
             setDataSocket();
-            OutputStream ostream = dataSocket.getOutputStream();
-//            for (String i : files) {
-//                String type = "- ";
-//                if (fileIOInstance.isDir(i)) {
-//                    type = "d ";
-//                }
-//                ostream.write(type.getBytes());
-//            }
             String str = fileIOInstance.lsdir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), currentPath));
             byte buffer[];
             if (useUTF8) {
@@ -413,11 +412,61 @@ public class CMDHandler {
                 buffer = str.getBytes("GB2312");
             }
             buffer = parseReturnChar(buffer, buffer.length);
-            ostream.write(buffer);
+            //ostream.write(buffer);
+            commInstance.send(dataSocket, buffer);
             response(Statics.LIST_SUCC_RETURN);
             dataSocket.close();
         } catch (Exception e) {
             response(Statics.LIST_FAILED_RETURN);
+            throw e;
+        }
+    }
+
+    public void RNFR(String args) throws Exception {
+        try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
+            String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            if (!fileIOInstance.exist(temp)) {
+                throw new FileNotFoundException(args);
+            }
+            renameFile = temp;
+            response(Statics.RNFR_SUCC_RETURN);
+        } catch (Exception e) {
+            response(Statics.RNFR_FALIED_RETURN);
+            throw e;
+        }
+    }
+
+    public void RNTO(String args) throws Exception {
+        try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
+            String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            if (fileIOInstance.exist(temp)) {
+                throw new FileAlreadyExistsException(temp);
+            }
+            fileIOInstance.rnfile(renameFile, temp);
+            response(Statics.RNTO_SUCC_RETURN);
+            renameFile = "";
+        } catch (Exception e) {
+            response(Statics.RNTO_FAILED_RETURN);
+            throw e;
+        }
+    }
+
+    public void SIZE(String args) throws Exception {
+        try {
+            if (!useUTF8) {
+                args = new String(args.getBytes("GB2312"));
+            }
+            String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            long size = fileIOInstance.getsize(temp);
+            response(Statics.SIZE_SUCC_RETURN + String.valueOf(size) + "\n");
+        } catch (Exception e) {
+            response(Statics.SIZE_FAILED_RETURN);
             throw e;
         }
     }

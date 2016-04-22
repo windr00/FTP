@@ -4,6 +4,7 @@ import com.ftpserver.Statics;
 import com.ftpserver.commandhandler.CMDHandler;
 import com.ftpserver.logger.ConsoleLogger;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ public class ClientSocketThread extends Thread {
     }
 
     public void onResponse(java.lang.String msg) throws Exception {
-            communicationInstance.send(client, msg.toCharArray());
+        communicationInstance.send(client, msg.getBytes());
     }
 
     private void logException(Exception e) {
@@ -42,45 +43,46 @@ public class ClientSocketThread extends Thread {
 
     @Override
     public void run() {
-        int errorCount = 0;
-            while (true) {
-                try {
-                    if (errorCount > 10) {
-                        handler.cleanUp();
-                        client.close();
-                    }
-                    String cmd = new String(communicationInstance.read(client));
-                    String[] params = cmd.split(" ");
-                    String op = params[0];
-                    cmd = "";
-                    for (int i = 1; i < params.length; i++) {
-                        cmd += params[i];
-                    }
-                    try {
-                        Method handle = handler.getClass().getMethod(op.trim(), String.class);
+        while (true) {
+            try {
+                String cmd = new String(communicationInstance.read(client));
+                String[] params = cmd.split(" ");
+                String op = params[0];
+                op = op.toUpperCase();
 
-                        handle.invoke(handler, cmd);
-                    } catch (NoSuchMethodException e) {
-
-                        try {
-                            onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
-                        } catch (Exception ex) {
-                            logException(ex);
-                        }
-                    }
-                    errorCount = 0;
-                    if (op.equals("QUIT")) {
-                        client.close();
-                        ConsoleLogger.info("CLOSE ON " + client.toString());
-                        break;
-                    }
-                } catch (Exception e) {
-                    if (errorCount > 10) {
-                        return;
-                    }
-                    logException(e);
-                    errorCount++;
+                cmd = "";
+                for (int i = 1; i < params.length; i++) {
+                    cmd += params[i];
                 }
+                try {
+                    Method handle = handler.getClass().getMethod(op.trim(), String.class);
+
+                    handle.invoke(handler, cmd);
+                } catch (NoSuchMethodException e) {
+                    logException(e);
+                    try {
+                        onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                    } catch (Exception ex) {
+                        logException(ex);
+                    }
+                }
+                if (op.equals("QUIT")) {
+                    client.close();
+                    ConsoleLogger.info("CLOSE ON " + client.toString());
+                    break;
+                }
+            } catch (Exception e) {
+                logException(e);
+
+                handler.cleanUp();
+                try {
+                    client.close();
+                } catch (IOException ex) {
+                    return;
+
+                }
+                return;
+            }
         }
 
     }

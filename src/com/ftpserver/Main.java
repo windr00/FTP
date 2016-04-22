@@ -15,6 +15,7 @@ public class Main {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ConsoleLogger.info(df.format(new Date()));
         try {
+            //Config.getInstance().init("/Users/windr/Desktop/");
             ConsoleLogger.info("FTP Service started on " + InetAddress.getLocalHost().getHostAddress());
         } catch (Exception e) {
             ConsoleLogger.error("FTP Service init failed");
@@ -26,7 +27,7 @@ public class Main {
             communication.bind(2120, 3);
             while (true) {
                 Socket client = communication.accept();
-                communication.send(client, Statics.INIT_RETURN.toCharArray());
+                communication.send(client, Statics.INIT_RETURN.getBytes());
                 ClientSocketThread thread = new ClientSocketThread(client);
                 thread.start();
             }

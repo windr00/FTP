@@ -179,7 +179,6 @@ public class FileIO {
         String ret = "";
 //        path = appendFilePath(Config.getInstance().getRoot(), path);
         Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + path);
-        System.out.println(path);
         InputStream istream = p.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String result = "";
@@ -189,6 +188,25 @@ public class FileIO {
         br.close();
         istream.close();
         return ret;
+    }
+
+    public void rnfile(String opath, String npath) throws Exception {
+        File file = new File(opath);
+        File nfile = new File(npath);
+        if (!file.exists()) {
+            throw new FileNotFoundException(opath);
+        }
+        if (!file.renameTo(nfile)) {
+            throw new FileNotFoundException(npath);
+        }
+    }
+
+    public long getsize(String path) throws Exception {
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new FileNotFoundException(path);
+        }
+        return file.length();
     }
 
     public String appendFilePath(String currentpath, String newPath) {

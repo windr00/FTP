@@ -15,15 +15,8 @@ public class Config {
     private int cmdPort = 1025;
     private int maxConnection = 10;
 
-    public Config(String path) throws Exception {
+    private Config() {
         fileIOInstance = FileIO.getInstance();
-        byte[] jstring = fileIOInstance.read(path);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.fromObject(jstring);
-        this.cmdPort = jsonObject.getInt("cmdPort");
-        this.maxConnection = jsonObject.getInt("maxConnection");
-        this.root = jsonObject.getString("ftpRoot");
-
     }
 
     public static Config getInstance() {
@@ -31,6 +24,22 @@ public class Config {
             _instance = new Config();
         }
         return _instance;
+    }
+
+    public void init(String path) throws Exception {
+        byte[] jstring = fileIOInstance.read(path);
+        JSONObject jsonObject = new JSONObject();
+        JSONObject.fromObject(jstring);
+        this.cmdPort = jsonObject.getInt("cmdPort");
+        this.maxConnection = jsonObject.getInt("maxConnection");
+        this.root = jsonObject.getString("ftpRoot");
+        this.lsCMD = jsonObject.getString("lsCMD");
+
+    }
+
+    public void saveSettings() throws Exception {
+        JSONObject jsonObject = new JSONObject();
+
     }
 
     public int getCmdPort() {
