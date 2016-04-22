@@ -1,5 +1,6 @@
 package com.ftpserver.commandhandler;
 
+import com.ftpserver.Config;
 import com.ftpserver.Statics;
 import com.ftpserver.agent.UserLoginAgent;
 import com.ftpserver.event.Event;
@@ -104,9 +105,9 @@ public class CMDHandler {
         try {
             String temp = "";
             if (args.startsWith("/")) {
-                temp = fileIOInstance.cddir(args);
+                temp = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), args));
             } else {
-                temp = fileIOInstance.appendFilePath(currentPath, args);
+                temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
                 temp = fileIOInstance.cddir(temp);
             }
             response(Statics.CWD_SUCC_RETURN);
@@ -125,7 +126,7 @@ public class CMDHandler {
             }
 
             currentPath = fileIOInstance.appendFilePath(currentPath, "../");
-            currentPath = fileIOInstance.cddir(currentPath);
+            currentPath = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), currentPath));
             response(Statics.CDUP_SUCC_RETURN);
 
         } catch (Exception e) {
@@ -270,6 +271,7 @@ public class CMDHandler {
         try {
             String filepath = args.trim();
             String temp = fileIOInstance.appendFilePath(currentPath, filepath);
+            temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             setDataSocket();
             FileInputStream filereader = fileIOInstance.open(temp);
             byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
@@ -305,7 +307,7 @@ public class CMDHandler {
         args = args.trim();
         try {
             setDataSocket();
-            if (fileIOInstance.exist(fileIOInstance.appendFilePath(currentPath, args))) {
+            if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)))) {
                 throw new FileAlreadyExistsException(args);
             }
             InputStream istream = dataSocket.getInputStream();
@@ -316,8 +318,8 @@ public class CMDHandler {
             } else {
                 response(Statics.STOR_STRART_I_RETURN);
             }
-            fileIOInstance.create(fileIOInstance.appendFilePath(currentPath, args));
-            String file = fileIOInstance.appendFilePath(currentPath, args);
+            fileIOInstance.create(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)));
+            String file = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
             while ((amount = istream.read(buffer)) != -1) {
 
                 fileIOInstance.write(file, buffer, amount);
@@ -335,7 +337,8 @@ public class CMDHandler {
     public void MKD(String args) throws Exception {
         try {
             String temp = fileIOInstance.appendFilePath(currentPath, args);
-            fileIOInstance.mkDir(temp);
+            String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
+            fileIOInstance.mkDir(fullpath);
             response(Statics.MKD_SUCC_RETURN);
         } catch (Exception e) {
             if (e.getClass() == FileAlreadyExistsException.class) {
@@ -351,7 +354,8 @@ public class CMDHandler {
     public void RMD(String args) throws Exception {
         try {
             String temp = fileIOInstance.appendFilePath(currentPath, args);
-            fileIOInstance.rmdir(temp);
+            String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
+            fileIOInstance.rmdir(fullpath);
             response(Statics.RMD_SUCC_RETURN);
         } catch (Exception e) {
             if (e.getClass() == FileIsNotDirectoryException.class) {
@@ -366,7 +370,8 @@ public class CMDHandler {
     public void DELE(String args) throws Exception {
         try {
             String temp = fileIOInstance.appendFilePath(currentPath, args);
-            fileIOInstance.rmfile(temp);
+            String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
+            fileIOInstance.rmfile(fullpath);
             response(Statics.DELE_SUCC_RETURN);
         } catch (Exception e) {
             if (e.getClass() == FileIsDirectoryException.class) {
@@ -400,7 +405,7 @@ public class CMDHandler {
 //                }
 //                ostream.write(type.getBytes());
 //            }
-            String str = fileIOInstance.lsdir(currentPath);
+            String str = fileIOInstance.lsdir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), currentPath));
             byte buffer[];
             if (useUTF8) {
                 buffer = str.getBytes("UTF8");

@@ -23,8 +23,7 @@ public class FileIO {
     }
 
     public void rmfile(String path) throws Exception {
-        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
-        File file = new File(fullpath);
+        File file = new File(path);
         if (file.isDirectory()) {
             throw new FileIsDirectoryException(path);
         }
@@ -34,8 +33,7 @@ public class FileIO {
     }
 
     public void rmdir(String path) throws Exception {
-        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
-        File file = new File(fullpath);
+        File file = new File(path);
         if (!file.isDirectory()) {
             throw new FileIsNotDirectoryException(path);
         }
@@ -77,7 +75,7 @@ public class FileIO {
     }
 
     public void create(String path) throws Exception {
-        File file = new File(appendFilePath(Config.getInstance().getRoot(), path));
+        File file = new File(path);
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
         }
@@ -87,7 +85,7 @@ public class FileIO {
     }
 
     public void write(String path, byte[] content, int length) throws Exception {
-        File file = new File(appendFilePath(Config.getInstance().getRoot(), path));
+        File file = new File(path);
         if (!file.exists()) {
             throw new FileNotFoundException(path);
         }
@@ -102,8 +100,8 @@ public class FileIO {
     }
 
     public void mkDir(String path) throws Exception {
-        String fullpath = appendFilePath(Config.getInstance().getRoot(), path);
-        File file = new File(fullpath);
+
+        File file = new File(path);
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
         }
@@ -115,18 +113,17 @@ public class FileIO {
     }
 
     public boolean isDir(String path) throws Exception {
-        return new File(Config.getInstance().getRoot() + path).isDirectory();
+        return new File(path).isDirectory();
     }
 
     public boolean exist(String path) {
-        String uri = appendFilePath(Config.getInstance().getRoot(), path);
 //        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
-        File file = new File(uri);
+        File file = new File(path);
         return file.exists() && file.isDirectory();
     }
 
     public FileInputStream open(String path) throws Exception {
-        File file = new File(Config.getInstance().getRoot() + path);
+        File file = new File(path);
         return new FileInputStream(file);
     }
 
@@ -151,8 +148,8 @@ public class FileIO {
 //        else {
 //            throw new NoSuchFileException(path);
 //        }
+        // path = appendFilePath(Config.getInstance().getRoot(), path);
 
-        path = appendFilePath(Config.getInstance().getRoot(), path);
         String pathcuts[] = path.split("/");
         for (int i = 0; i < pathcuts.length; i++) {
             if (pathcuts[i].equals("..")) {
@@ -180,7 +177,7 @@ public class FileIO {
 
     public String lsdir(String path) throws Exception {
         String ret = "";
-        path = appendFilePath(Config.getInstance().getRoot(), path);
+//        path = appendFilePath(Config.getInstance().getRoot(), path);
         Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + path);
         System.out.println(path);
         InputStream istream = p.getInputStream();
