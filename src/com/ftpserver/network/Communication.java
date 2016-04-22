@@ -47,25 +47,27 @@ public class Communication {
         return this.server.accept();
     }
 
-    public void send(Socket client, char[] data) throws Exception {
+    public void send(Socket client, byte[] data) throws Exception {
         OutputStream ostream = client.getOutputStream();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(ostream));
-        bw.write(data);
-        bw.flush();
+        ostream.write(data);
+        if (data.length < 1024) {
+            ConsoleLogger.info("SEND " + client.toString() + new String(data));
+        }
         //bw.close();
         //ostream.close();
-        ConsoleLogger.info("SEND " + client.toString() + new String(data));
         this.eventHandler.invokeAll(data.length);
     }
 
-    public char[] read(Socket client) throws Exception {
+    public byte[] read(Socket client) throws Exception {
         InputStream istream = client.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String str = br.readLine();
-        ConsoleLogger.info("READ " + client.toString() + str);
+        if (str.length() < 1024) {
+            ConsoleLogger.info("READ " + client.toString() + str);
+        }
         //br.close();
         //istream.close();
         this.eventHandler.invokeAll(str.toCharArray().length);
-        return str.toCharArray();
+        return str.getBytes();
     }
 }

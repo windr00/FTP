@@ -60,6 +60,12 @@ public class Statics {
     public static final String RMD_SUCC_RETURN = "250 RM DIRECTORY SUCCESSFUL\n";
     public static final String RMD_FALIED_RETURN = "250 RM DIRECTORY FALIED\n";
     public static final String RMD_ISFILE_WARN_RETURN = "550 RM DIRECTORY FALIED FILE IS NOT A DICRECTORY\n";
+    public static final String RNFR_SUCC_RETURN = "350 RNFR SUCCESSFUL\n";
+    public static final String RNFR_FALIED_RETURN = "550 RNFR FAILED\n";
+    public static final String RNTO_SUCC_RETURN = "250 RNTO SUCCESSFUL\n";
+    public static final String RNTO_FAILED_RETURN = "550 RNTO FAILED\n";
+    public static final String SIZE_SUCC_RETURN = "213 ";
+    public static final String SIZE_FAILED_RETURN = "500 GET SIZE FAILED\n";
 
 
     public enum NET_TRANSFER_TYPE {
