@@ -5,9 +5,9 @@ package com.ftpserver;
  */
 public class Statics {
 
-    public static final int FILE_READ_BUFFER_LENGTH = 1024;
+    public static final int FILE_READ_BUFFER_LENGTH = 76800;
 
-    public static final int NET_READ_BUFFER_LENGTH = 1024;
+    public static final int NET_READ_BUFFER_LENGTH = 76800;
     public static final String COMMAND_NOT_UNDERSTOOD_RETURN = "500 COMMAND NOT UNDERSTOOD\n";
     public static final String INIT_RETURN = "220 SERVICE READY\n";
     public static final String AUTH_RETURN = "500 LTS NOT SUPPORTED\n";
@@ -58,8 +58,9 @@ public class Statics {
     public static final String RNTO_FAILED_RETURN = "550 RNTO FAILED\n";
     public static final String SIZE_SUCC_RETURN = "213 ";
     public static final String SIZE_FAILED_RETURN = "500 GET SIZE FAILED\n";
+    public static final String CMD_NOT_ALLOWED_RETURN = "450 CMD NOT ALLOWED, YOU MAY NEED TO LOGIN FIRST\n";
     public static String SYSTEM_STASH;
-    public static String SYST_RETURN;
+    public static String SYST_RETURN = "215 ";
 
     //    λ	接入命令：USER、PASS、ACCT、REIN、QUIT和ABOR；
 //    λ	文件管理命令：CWD、CDUP、DELE、LIST、NLIST、MKD、PWD、RMD、RNFR、RNTO和SMNT；
@@ -74,7 +75,7 @@ public class Statics {
         } else {
             SYSTEM_STASH = "/";
         }
-        SYST_RETURN = "215 " + os + "\n";
+        SYST_RETURN = SYST_RETURN + os + "\n";
     }
 
 

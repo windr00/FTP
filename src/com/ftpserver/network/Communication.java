@@ -54,8 +54,6 @@ public class Communication {
         if (data.length < 1024) {
             ConsoleLogger.info("SEND " + client.toString() + new String(data));
         }
-        //bw.close();
-        //ostream.close();
         this.eventHandler.invokeAll(data.length, Statics.NET_TRANSFER_TYPE.UPLOAD);
     }
 
@@ -66,8 +64,6 @@ public class Communication {
         if (str.length() < 1024) {
             ConsoleLogger.info("READ " + client.toString() + str);
         }
-        //br.close();
-        //istream.close();
         this.eventHandler.invokeAll(str.getBytes().length, Statics.NET_TRANSFER_TYPE.DOWNLOAD);
         return str.getBytes();
     }

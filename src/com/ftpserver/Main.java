@@ -1,5 +1,6 @@
 package com.ftpserver;
 
+import com.ftpserver.agent.UserLoginAgent;
 import com.ftpserver.logger.ConsoleLogger;
 import com.ftpserver.logger.NetTransferLogger;
 import com.ftpserver.network.ClientSocketThread;
@@ -20,7 +21,6 @@ public class Main {
         Config configInstance = Config.getInstance();
         Communication communication = Communication.getInstance();
         communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
-
         while (true) {
             if (!configInstance.init("." + Statics.SYSTEM_STASH + "ftpconfig.json")) {
                 try {
@@ -43,6 +43,14 @@ public class Main {
 
             }
             break;
+        }
+
+        try {
+            UserLoginAgent.getInstance().init("." + Statics.SYSTEM_STASH + "users.json");
+        } catch (Exception e) {
+            ConsoleLogger.error("FATAL ERROR, EXITING NOW!");
+            e.printStackTrace();
+            return;
         }
 
         try {

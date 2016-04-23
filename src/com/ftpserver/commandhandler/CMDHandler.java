@@ -50,6 +50,8 @@ public class CMDHandler {
 
     private Communication commInstance = Communication.getInstance();
 
+    private UserLoginAgent userLoginAgent = UserLoginAgent.getInstance();
+
     private EventHandler onResponseEventHandler;
 
     public CMDHandler(Object obj, String mtd) {
@@ -77,7 +79,7 @@ public class CMDHandler {
 
     public void PASS(String args) throws Exception {
         String userpass = args.trim();
-        isloggedin = UserLoginAgent.userAuthenticate(username, userpass);
+        isloggedin = userLoginAgent.userAuthenticate(username, userpass);
         if (isloggedin) {
             response(Statics.PASS_LOGEDIN_RETURN);
         } else {
@@ -106,7 +108,10 @@ public class CMDHandler {
     }
 
     public void CWD(String args) throws Exception {
-
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             String temp = "";
             if (!useUTF8) {
@@ -127,6 +132,10 @@ public class CMDHandler {
     }
 
     public void CDUP(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (currentPath.equals(Statics.SYSTEM_STASH)) {
                 response(Statics.CDUP_SUCC_RETURN);
@@ -144,6 +153,10 @@ public class CMDHandler {
     }
 
     public void PWD(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         if (!currentPath.startsWith(Statics.SYSTEM_STASH)) {
             currentPath = Statics.SYSTEM_STASH + currentPath;
         }
@@ -271,6 +284,10 @@ public class CMDHandler {
     }
 
     public void RETR(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             String filepath = args.trim();
             String temp = fileIOInstance.appendFilePath(currentPath, filepath);
@@ -308,6 +325,10 @@ public class CMDHandler {
     }
 
     public void STOR(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         args = args.trim();
         try {
             if (!useUTF8) {
@@ -342,6 +363,10 @@ public class CMDHandler {
     }
 
     public void MKD(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -362,6 +387,10 @@ public class CMDHandler {
     }
 
     public void RMD(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -381,6 +410,10 @@ public class CMDHandler {
     }
 
     public void DELE(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -401,7 +434,7 @@ public class CMDHandler {
 
 
     public void ABOR(String args) throws Exception {
-        if (dataSocket.isConnected()) {
+        if (dataSocket != null && !dataSocket.isClosed()) {
             dataSocket.close();
             response(Statics.ABOR_SUCC_RETURN);
         } else {
@@ -410,6 +443,10 @@ public class CMDHandler {
     }
 
     public void LIST(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             response(Statics.LIST_START_RETURN);
             setDataSocket();
@@ -432,6 +469,10 @@ public class CMDHandler {
     }
 
     public void RNFR(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -449,6 +490,10 @@ public class CMDHandler {
     }
 
     public void RNTO(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -467,6 +512,10 @@ public class CMDHandler {
     }
 
     public void SIZE(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));

@@ -80,10 +80,22 @@ public class FileIO {
         return sb.toString().getBytes();
     }
 
+    private void rccdir(File file) throws Exception {
+        if (file.getParentFile().exists()) {
+            file.mkdir();
+        } else {
+            rccdir(file.getParentFile());
+            file.mkdir();
+        }
+    }
+
     public void create(String path) throws Exception {
         File file = new File(path);
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
+        }
+        if (!file.getParentFile().exists()) {
+            rccdir(file.getParentFile());
         }
         if (!file.createNewFile()) {
             throw new FileNotFoundException(path);
