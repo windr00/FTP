@@ -42,7 +42,7 @@ public class CMDHandler {
 
     private Socket dataSocket = null;
 
-    private String currentPath = "/";
+    private String currentPath = Statics.SYSTEM_STASH;
 
     private String renameFile = "";
 
@@ -112,7 +112,7 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            if (args.startsWith("/")) {
+            if (args.startsWith(Statics.SYSTEM_STASH)) {
                 temp = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), args));
             } else {
                 temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
@@ -128,12 +128,12 @@ public class CMDHandler {
 
     public void CDUP(String args) throws Exception {
         try {
-            if (currentPath.equals("/")) {
+            if (currentPath.equals(Statics.SYSTEM_STASH)) {
                 response(Statics.CDUP_SUCC_RETURN);
                 return;
             }
 
-            currentPath = fileIOInstance.appendFilePath(currentPath, "../");
+            currentPath = fileIOInstance.appendFilePath(currentPath, ".." + Statics.SYSTEM_STASH);
             currentPath = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), currentPath));
             response(Statics.CDUP_SUCC_RETURN);
 
@@ -144,8 +144,8 @@ public class CMDHandler {
     }
 
     public void PWD(String args) throws Exception {
-        if (!currentPath.startsWith("/")) {
-            currentPath = "/" + currentPath;
+        if (!currentPath.startsWith(Statics.SYSTEM_STASH)) {
+            currentPath = Statics.SYSTEM_STASH + currentPath;
         }
         response(Statics.PWD_RETURN + "\"" + currentPath + "\"\n");
     }

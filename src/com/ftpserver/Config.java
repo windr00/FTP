@@ -15,6 +15,7 @@ public class Config {
     private String lsCMD = "/bin/ls -l ";
     private int cmdPort = 1025;
     private int maxConnection = 10;
+    
 
     private Config() {
         fileIOInstance = FileIO.getInstance();

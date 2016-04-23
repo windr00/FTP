@@ -8,17 +8,9 @@ public class Statics {
     public static final int FILE_READ_BUFFER_LENGTH = 1024;
 
     public static final int NET_READ_BUFFER_LENGTH = 1024;
-
-    //    λ	接入命令：USER、PASS、ACCT、REIN、QUIT和ABOR；
-//    λ	文件管理命令：CWD、CDUP、DELE、LIST、NLIST、MKD、PWD、RMD、RNFR、RNTO和SMNT；
-//    λ	数据格式化命令：TYPE、STRU、MODE；
-//    λ	端口定义命令包括PORT和PASV;
-//    λ	文件传送命令：RETR、STOR、APPE、STOU、ALLO、REST和STAT；
-//    λ	杂项命令：HELP、NOOP、SITE和SYST
     public static final String COMMAND_NOT_UNDERSTOOD_RETURN = "500 COMMAND NOT UNDERSTOOD\n";
     public static final String INIT_RETURN = "220 SERVICE READY\n";
     public static final String AUTH_RETURN = "500 LTS NOT SUPPORTED\n";
-    public static final String SYST_RETURN = "215 UNIX TYPE: L8\n";
     public static final String FEAT_RETURN = "211-FEATURES SUPPORTED\nUTF8\n211 END\n";
     public static final String OPTS_UTF8_ON_RETURN = "200 OPTS UTF8 IS SET TO ON.\n";
     public static final String OPTS_UTF8_OFF_RETURN = "200 OPTS UTF8 IS SET TO OFF.\n";
@@ -66,6 +58,24 @@ public class Statics {
     public static final String RNTO_FAILED_RETURN = "550 RNTO FAILED\n";
     public static final String SIZE_SUCC_RETURN = "213 ";
     public static final String SIZE_FAILED_RETURN = "500 GET SIZE FAILED\n";
+    public static String SYSTEM_STASH;
+    public static String SYST_RETURN;
+
+    //    λ	接入命令：USER、PASS、ACCT、REIN、QUIT和ABOR；
+//    λ	文件管理命令：CWD、CDUP、DELE、LIST、NLIST、MKD、PWD、RMD、RNFR、RNTO和SMNT；
+//    λ	数据格式化命令：TYPE、STRU、MODE；
+//    λ	端口定义命令包括PORT和PASV;
+//    λ	文件传送命令：RETR、STOR、APPE、STOU、ALLO、REST和STAT；
+//    λ	杂项命令：HELP、NOOP、SITE和SYST
+    static {
+        String os = System.getProperty("os.name").toUpperCase();
+        if (os.startsWith("WIN")) {
+            SYSTEM_STASH = "\\";
+        } else {
+            SYSTEM_STASH = "/";
+        }
+        SYST_RETURN = "215 " + os + "\n";
+    }
 
 
     public enum NET_TRANSFER_TYPE {
