@@ -11,7 +11,7 @@ public class Config {
 
     private static Config _instance;
     private FileIO fileIOInstance;
-    private String root = "/";
+    private String root = "/Users/windr/Desktop/FTP/";
     private String lsCMD = "/bin/ls -l ";
     private int cmdPort = 1025;
     private int maxConnection = 10;

@@ -64,7 +64,7 @@ public class FileIO {
     }
 
     public byte[] read(String path) throws Exception {
-        File file = new File(Config.getInstance().getRoot() + path);
+        File file = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String tmp = null;
         StringBuilder sb = new StringBuilder();

@@ -15,10 +15,13 @@ public class NetTransferLogger {
     }
 
     public static NetTransferLogger getInstance() {
+        if (_instance == null) {
+            _instance = new NetTransferLogger();
+        }
         return _instance;
     }
 
-    public void logNetTransfer(long length, Statics.NET_TRANSFER_TYPE type) {
+    public void logNetTransfer(Integer length, Statics.NET_TRANSFER_TYPE type) {
         if (type == Statics.NET_TRANSFER_TYPE.DOWNLOAD) {
             downsum += length;
         } else if (type == Statics.NET_TRANSFER_TYPE.UPLOAD) {

@@ -1,5 +1,6 @@
 package com.ftpserver.network;
 
+import com.ftpserver.Statics;
 import com.ftpserver.event.Event;
 import com.ftpserver.event.EventHandler;
 import com.ftpserver.logger.ConsoleLogger;
@@ -55,7 +56,7 @@ public class Communication {
         }
         //bw.close();
         //ostream.close();
-        this.eventHandler.invokeAll(data.length);
+        this.eventHandler.invokeAll(data.length, Statics.NET_TRANSFER_TYPE.UPLOAD);
     }
 
     public byte[] read(Socket client) throws Exception {
@@ -67,7 +68,7 @@ public class Communication {
         }
         //br.close();
         //istream.close();
-        this.eventHandler.invokeAll(str.toCharArray().length);
+        this.eventHandler.invokeAll(str.getBytes().length, Statics.NET_TRANSFER_TYPE.DOWNLOAD);
         return str.getBytes();
     }
 }

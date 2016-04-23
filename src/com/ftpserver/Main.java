@@ -1,6 +1,7 @@
 package com.ftpserver;
 
 import com.ftpserver.logger.ConsoleLogger;
+import com.ftpserver.logger.NetTransferLogger;
 import com.ftpserver.network.ClientSocketThread;
 import com.ftpserver.network.Communication;
 
@@ -16,7 +17,7 @@ public class Main {
         ConsoleLogger.info(df.format(new Date()));
         Config configInstance = Config.getInstance();
         Communication communication = Communication.getInstance();
-        //communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
+        communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
         try {
             configInstance.init("/Users/windr/Desktop/ls.json");
 
@@ -45,6 +46,7 @@ public class Main {
             ConsoleLogger.error(df.format(new Date()));
             ConsoleLogger.error(e.toString());
             ConsoleLogger.error(e.getMessage());
+            e.printStackTrace(System.out);
         }
     }
 }

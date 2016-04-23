@@ -168,7 +168,11 @@ public class CMDHandler {
                 response(Statics.OPTS_UTF8_OFF_RETURN);
                 useUTF8 = false;
             }
+        } else if (args.contains("GB2312") && args.contains("ON")) {
+            response(Statics.OPTS_UTF8_OFF_RETURN);
+            useUTF8 = false;
         } else {
+
             response(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
         }
     }
