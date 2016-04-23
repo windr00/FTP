@@ -46,6 +46,11 @@ public class ClientSocketThread extends Thread {
         while (true) {
             try {
                 String cmd = new String(communicationInstance.read(client));
+                if (Statics.SYSTEM_STASH == "\\") {
+                    if (cmd.contains("/\\/")) {
+                        cmd = cmd.replace("/\\/", "\\");
+                    }
+                }
                 String[] params = cmd.split(" ");
                 String op = params[0];
                 op = op.toUpperCase();

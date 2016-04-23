@@ -22,7 +22,7 @@ public class Statics {
     public static final String TYPE_FAILED_RETURN = "501 WRONG TYPE\n";
     public static final String NOOP_RETURN = "200 NOOP OK.\n";
     public static final String CWD_SUCC_RETURN = "250 CWD SUCCESSFUL.\n";
-    public static final String CWD_FAILED_RETURN = "550 CWD FILED\n";
+    public static final String CWD_FAILED_RETURN = "550 CWD FAILED\n";
     public static final String PWD_RETURN = "257 CURRENT DIRECTORY IS ";
     public static final String PORT_FAILED_RETURN = "500 PORT PARAM ERROR.\n";
     public static final String PORT_SUCC_RETURN = "200 PORT SUCCESSFUL\n";

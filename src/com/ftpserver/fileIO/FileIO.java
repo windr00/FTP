@@ -1,6 +1,7 @@
 package com.ftpserver.fileIO;
 
 import com.ftpserver.Config;
+import com.ftpserver.Statics;
 import com.ftpserver.exceptions.FileIsDirectoryException;
 import com.ftpserver.exceptions.FileIsNotDirectoryException;
 
@@ -133,29 +134,11 @@ public class FileIO {
     }
 
     public String cddir(String path) throws Exception {
-//        Process p = Runtime.getRuntime().exec(Config.getInstance().getCdCMD() + Config.getInstance().getRoot() + path + ";" + Config.getInstance().getPwdCMD());
-//        InputStream istream = p.getInputStream();
-//        BufferedReader br = new BufferedReader(new InputStreamReader(istream));
-//        String result = br.readLine();
-//
-//        if (br.readLine() != null){
-//            br.close();
-//            istream.close();
-//            throw new NoSuchFileException(path);
-//        }
-//        istream.close();
-//        br.close();
-//        p.destroy();
-//        result = appendStash(result);
-//        if (result.startsWith(Config.getInstance().getRoot())) {
-//            return result.substring(Config.getInstance().getRoot().length());
-//        }
-//        else {
-//            throw new NoSuchFileException(path);
-//        }
-        // path = appendFilePath(Config.getInstance().getRoot(), path);
-
-        String pathcuts[] = path.split("/");
+        String regex = Statics.SYSTEM_STASH;
+        if (Statics.SYSTEM_STASH.equals("\\")) {
+            regex = "\\\\";
+        }
+        String pathcuts[] = path.split(regex);
         for (int i = 0; i < pathcuts.length; i++) {
             if (pathcuts[i].equals("..")) {
                 pathcuts[i] = "";
@@ -167,10 +150,14 @@ public class FileIO {
                 }
             }
         }
-        String result = "/";
+
+        String result = "";
+        if (Statics.SYSTEM_STASH.equals("/")) {
+            result = "/";
+        }
         for (int i = 0; i < pathcuts.length; i++) {
             if (!pathcuts[i].equals("")) {
-                result += pathcuts[i] + "/";
+                result += pathcuts[i] + Statics.SYSTEM_STASH;
             }
         }
         if (!result.startsWith(appendStash(Config.getInstance().getRoot()))) {
@@ -215,21 +202,21 @@ public class FileIO {
     }
 
     public String appendFilePath(String currentpath, String newPath) {
-        if (!currentpath.endsWith("/")) {
-            currentpath = currentpath.concat("/");
+        if (!currentpath.endsWith(Statics.SYSTEM_STASH)) {
+            currentpath = currentpath.concat(Statics.SYSTEM_STASH);
         }
-        if (!newPath.endsWith("/")) {
-            newPath = newPath.concat("/");
+        if (!newPath.endsWith(Statics.SYSTEM_STASH)) {
+            newPath = newPath.concat(Statics.SYSTEM_STASH);
         }
-        if (newPath.startsWith("/")) {
+        if (newPath.startsWith(Statics.SYSTEM_STASH)) {
             newPath = newPath.substring(1);
         }
         return currentpath.concat(newPath);
     }
 
     public String appendStash(String path) {
-        if (!path.endsWith("/")) {
-            path = path.concat("/");
+        if (!path.endsWith(Statics.SYSTEM_STASH)) {
+            path = path.concat(Statics.SYSTEM_STASH);
         }
         return path;
     }

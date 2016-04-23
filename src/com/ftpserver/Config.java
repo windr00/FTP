@@ -28,15 +28,21 @@ public class Config {
         return _instance;
     }
 
-    public void init(String path) throws Exception {
-        String jstring = new String(fileIOInstance.read(path));
-        JSONArray jsonArray = JSONArray.fromObject(jstring);
-        JSONObject jsonObject = jsonArray.getJSONObject(0);
-        this.cmdPort = Integer.parseInt(jsonObject.getString("cmdPort"));
-        this.maxConnection = Integer.parseInt(jsonObject.getString("maxConnection"));
-        this.root = jsonObject.getString("ftpRoot");
-        this.lsCMD = jsonObject.getString("lsCMD");
+    public boolean init(String path) {
+        try {
+            String jstring = new String(fileIOInstance.read(path));
+            JSONArray jsonArray = JSONArray.fromObject(jstring);
+            JSONObject jsonObject = jsonArray.getJSONObject(0);
+            this.cmdPort = Integer.parseInt(jsonObject.getString("cmdPort"));
+            this.maxConnection = Integer.parseInt(jsonObject.getString("maxConnection"));
+            this.root = jsonObject.getString("ftpRoot");
+            this.lsCMD = jsonObject.getString("lsCMD");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 
     public void saveSettings(String path) throws Exception {
         JSONObject jsonObject = new JSONObject();

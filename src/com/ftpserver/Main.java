@@ -5,6 +5,8 @@ import com.ftpserver.logger.NetTransferLogger;
 import com.ftpserver.network.ClientSocketThread;
 import com.ftpserver.network.Communication;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -18,9 +20,27 @@ public class Main {
         Config configInstance = Config.getInstance();
         Communication communication = Communication.getInstance();
         communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
-        try {
-            configInstance.init("/Users/windr/Desktop/ls.json");
 
+        if (!configInstance.init("E:\\ftpconfig.json")) {
+            try {
+                ConsoleLogger.error("Config load falied");
+                ConsoleLogger.info("please input ftp root path");
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                configInstance.setRoot(br.readLine());
+                ConsoleLogger.info("please input command port");
+                configInstance.setCmdPort(Integer.parseInt(br.readLine()));
+                ConsoleLogger.info("please input maximum connection limit");
+                configInstance.setMaxConnection(Integer.parseInt(br.readLine()));
+                ConsoleLogger.info("please input ls cmd path");
+                configInstance.setLsCMD(br.readLine());
+                configInstance.saveSettings("E:\\ftpconfig.json");
+            } catch (Exception e) {
+                ConsoleLogger.error("FATAL ERROR, EXITING NOW!");
+                return;
+            }
+        }
+
+        try {
             //Config.getInstance().saveSettings("/Users/windr/Desktop/ls.json");
 
             communication.bind(configInstance.getCmdPort(), configInstance.getMaxConnection());
