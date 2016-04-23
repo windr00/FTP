@@ -21,7 +21,7 @@ public class Main {
         Communication communication = Communication.getInstance();
         communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
 
-        if (!configInstance.init("E:\\ftpconfig.json")) {
+        if (!configInstance.init("." + Statics.SYSTEM_STASH + "ftpconfig.json")) {
             try {
                 ConsoleLogger.error("Config load falied");
                 ConsoleLogger.info("please input ftp root path");
@@ -33,7 +33,7 @@ public class Main {
                 configInstance.setMaxConnection(Integer.parseInt(br.readLine()));
                 ConsoleLogger.info("please input ls cmd path");
                 configInstance.setLsCMD(br.readLine());
-                configInstance.saveSettings("E:\\ftpconfig.json");
+                configInstance.saveSettings("." + Statics.SYSTEM_STASH + "ftpconfig.json");
             } catch (Exception e) {
                 ConsoleLogger.error("FATAL ERROR, EXITING NOW!");
                 return;

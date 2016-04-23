@@ -56,7 +56,10 @@ public class Config {
         byte[] buffer = jsonArray.toString().getBytes();
         if (!fileIOInstance.exist(path)) {
             fileIOInstance.create(path);
+        } else {
+            fileIOInstance.rmfile(path);
         }
+
         fileIOInstance.write(path, buffer, buffer.length);
     }
 

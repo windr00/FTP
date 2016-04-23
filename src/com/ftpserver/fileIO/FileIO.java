@@ -170,7 +170,7 @@ public class FileIO {
     public String lsdir(String path) throws Exception {
         String ret = "";
 //        path = appendFilePath(Config.getInstance().getRoot(), path);
-        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + path);
+        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + " -l " + path);
         InputStream istream = p.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String result = "";
