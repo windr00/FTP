@@ -63,10 +63,12 @@ public class ClientSocketThread extends Thread {
                     Method handle = handler.getClass().getMethod(op.trim(), String.class);
 
                     handle.invoke(handler, cmd);
-                } catch (NoSuchMethodException e) {
+                } catch (Exception e) {
                     logException(e);
                     try {
-                        onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                        if (e.getClass() == NoSuchMethodException.class) {
+                            onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                        }
                     } catch (Exception ex) {
                         logException(ex);
                     }

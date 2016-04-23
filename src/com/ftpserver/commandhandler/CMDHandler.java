@@ -28,9 +28,9 @@ public class CMDHandler {
 
     private boolean isloggedin = false;
 
-    private boolean useUTF8 = false;
+    private boolean useUTF8 = true;
 
-    private Statics.TRANSFER_TYPE netType;
+    private Statics.TRANSFER_TYPE netType = Statics.TRANSFER_TYPE.ASCII;
 
     private Statics.TRANSFER_MODE netMode;
 
@@ -216,7 +216,9 @@ public class CMDHandler {
     }
 
     private void setDataSocket() throws Exception {
-        pasvSocket.setSoTimeout(0);
+        if (pasvSocket != null) {
+            pasvSocket.setSoTimeout(0);
+        }
         if (netMode == Statics.TRANSFER_MODE.PORT) {
             dataSocket = new Socket(this.portHost, this.portPort);
         } else {
@@ -273,7 +275,10 @@ public class CMDHandler {
             String filepath = args.trim();
             String temp = fileIOInstance.appendFilePath(currentPath, filepath);
             temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
-            setDataSocket();
+            if (fileIOInstance.isDir(temp)) {
+                response(Statics.RETR_FAILED_RETURN);
+                return;
+            }
             FileInputStream filereader = fileIOInstance.open(temp);
             byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             int current_length = 0;
@@ -282,7 +287,7 @@ public class CMDHandler {
             } else {
                 response(Statics.RETR_STRART_I_RETURN);
             }
-
+            setDataSocket();
             while ((current_length = filereader.read(buffer)) != -1) {
                 if (netType == Statics.TRANSFER_TYPE.ASCII) {
                     buffer = parseReturnChar(buffer, current_length);
