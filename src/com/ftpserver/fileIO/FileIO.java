@@ -125,7 +125,7 @@ public class FileIO {
     public boolean exist(String path) {
 //        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
         File file = new File(path);
-        return file.exists() && file.isDirectory();
+        return file.exists();
     }
 
     public FileInputStream open(String path) throws Exception {

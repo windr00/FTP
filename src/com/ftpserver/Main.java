@@ -21,23 +21,28 @@ public class Main {
         Communication communication = Communication.getInstance();
         communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
 
-        if (!configInstance.init("." + Statics.SYSTEM_STASH + "ftpconfig.json")) {
-            try {
-                ConsoleLogger.error("Config load falied");
-                ConsoleLogger.info("please input ftp root path");
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                configInstance.setRoot(br.readLine());
-                ConsoleLogger.info("please input command port");
-                configInstance.setCmdPort(Integer.parseInt(br.readLine()));
-                ConsoleLogger.info("please input maximum connection limit");
-                configInstance.setMaxConnection(Integer.parseInt(br.readLine()));
-                ConsoleLogger.info("please input ls cmd path");
-                configInstance.setLsCMD(br.readLine());
-                configInstance.saveSettings("." + Statics.SYSTEM_STASH + "ftpconfig.json");
-            } catch (Exception e) {
-                ConsoleLogger.error("FATAL ERROR, EXITING NOW!");
-                return;
+        while (true) {
+            if (!configInstance.init("." + Statics.SYSTEM_STASH + "ftpconfig.json")) {
+                try {
+                    ConsoleLogger.error("Config load falied");
+                    ConsoleLogger.info("please input ftp root path");
+                    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                    configInstance.setRoot(br.readLine());
+                    ConsoleLogger.info("please input command port");
+                    configInstance.setCmdPort(Integer.parseInt(br.readLine()));
+                    ConsoleLogger.info("please input maximum connection limit");
+                    configInstance.setMaxConnection(Integer.parseInt(br.readLine()));
+                    ConsoleLogger.info("please input ls cmd path");
+                    configInstance.setLsCMD(br.readLine());
+                    configInstance.saveSettings("." + Statics.SYSTEM_STASH + "ftpconfig.json");
+                } catch (Exception e) {
+                    ConsoleLogger.error("FATAL ERROR, EXITING NOW!");
+                    e.printStackTrace();
+                    return;
+                }
+
             }
+            break;
         }
 
         try {

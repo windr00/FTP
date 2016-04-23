@@ -36,8 +36,9 @@ public class Config {
             this.cmdPort = Integer.parseInt(jsonObject.getString("cmdPort"));
             this.maxConnection = Integer.parseInt(jsonObject.getString("maxConnection"));
             this.root = jsonObject.getString("ftpRoot");
+
             this.lsCMD = jsonObject.getString("lsCMD");
-            return true;
+            return !(!fileIOInstance.exist(root) || !fileIOInstance.exist(lsCMD));
         } catch (Exception e) {
             return false;
         }
@@ -54,11 +55,10 @@ public class Config {
         jsonObject.put("lsCMD", this.lsCMD);
         jsonArray.add(0, jsonObject);
         byte[] buffer = jsonArray.toString().getBytes();
-        if (!fileIOInstance.exist(path)) {
-            fileIOInstance.create(path);
-        } else {
+        if (fileIOInstance.exist(path)) {
             fileIOInstance.rmfile(path);
         }
+        fileIOInstance.create(path);
 
         fileIOInstance.write(path, buffer, buffer.length);
     }
