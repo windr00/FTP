@@ -7,7 +7,6 @@ import com.ftpserver.exceptions.FileIsNotDirectoryException;
 
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.NoSuchFileException;
 
 /**
  * Created by windr on 4/19/16.
@@ -120,12 +119,8 @@ public class FileIO {
     public void mkDir(String path) throws Exception {
 
         File file = new File(path);
-        if (file.exists()) {
-            throw new FileAlreadyExistsException(path);
-        }
-        if (!file.mkdir()) {
-            throw new NoSuchFileException(path);
-        }
+        rccdir(file);
+
 
 
     }
@@ -217,9 +212,9 @@ public class FileIO {
         if (!currentpath.endsWith(Statics.SYSTEM_STASH)) {
             currentpath = currentpath.concat(Statics.SYSTEM_STASH);
         }
-        if (!newPath.endsWith(Statics.SYSTEM_STASH)) {
-            newPath = newPath.concat(Statics.SYSTEM_STASH);
-        }
+//        if (!newPath.endsWith(Statics.SYSTEM_STASH)) {
+//            newPath = newPath.concat(Statics.SYSTEM_STASH);
+//        }
         if (newPath.startsWith(Statics.SYSTEM_STASH)) {
             newPath = newPath.substring(1);
         }

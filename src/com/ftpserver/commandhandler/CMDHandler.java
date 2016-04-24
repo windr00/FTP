@@ -243,10 +243,10 @@ public class CMDHandler {
 
     public void PASV(String args) throws Exception {
         try {
+            int p = getUnusedPort();
             if (pasvSocket != null) {
                 pasvSocket.close();
             }
-            int p = getUnusedPort();
             pasvSocket = new ServerSocket(p);
             String ip = InetAddress.getLocalHost().getHostAddress().replace('.', ',');
             String port = String.valueOf(p / 256) + "," + String.valueOf(p % 256);
@@ -289,7 +289,7 @@ public class CMDHandler {
             return;
         }
         try {
-            String filepath = args.trim();
+            String filepath = args;
             String temp = fileIOInstance.appendFilePath(currentPath, filepath);
             temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             if (fileIOInstance.isDir(temp)) {
@@ -329,10 +329,14 @@ public class CMDHandler {
             response(Statics.CMD_NOT_ALLOWED_RETURN);
             return;
         }
-        args = args.trim();
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
+            }
+            if (netType == Statics.TRANSFER_TYPE.ASCII) {
+                response(Statics.STOR_STRART_A_RETURN);
+            } else {
+                response(Statics.STOR_STRART_I_RETURN);
             }
             setDataSocket();
             if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)))) {
@@ -341,11 +345,6 @@ public class CMDHandler {
             InputStream istream = dataSocket.getInputStream();
             byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
             int amount = 0;
-            if (netType == Statics.TRANSFER_TYPE.ASCII) {
-                response(Statics.STOR_STRART_A_RETURN);
-            } else {
-                response(Statics.STOR_STRART_I_RETURN);
-            }
             fileIOInstance.create(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)));
             String file = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
             while ((amount = istream.read(buffer)) != -1) {

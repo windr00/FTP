@@ -5,9 +5,9 @@ package com.ftpserver;
  */
 public class Statics {
 
-    public static final int FILE_READ_BUFFER_LENGTH = 76800;
+    public static final int FILE_READ_BUFFER_LENGTH = 1024;
 
-    public static final int NET_READ_BUFFER_LENGTH = 76800;
+    public static final int NET_READ_BUFFER_LENGTH = 65536;
     public static final String COMMAND_NOT_UNDERSTOOD_RETURN = "500 COMMAND NOT UNDERSTOOD\n";
     public static final String INIT_RETURN = "220 SERVICE READY\n";
     public static final String AUTH_RETURN = "500 LTS NOT SUPPORTED\n";

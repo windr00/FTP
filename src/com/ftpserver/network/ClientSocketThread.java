@@ -58,7 +58,11 @@ public class ClientSocketThread extends Thread {
                 cmd = "";
                 for (int i = 1; i < params.length; i++) {
                     cmd += params[i];
+                    if (i != params.length - 1) {
+                        cmd += " ";
+                    }
                 }
+
                 try {
                     Method handle = handler.getClass().getMethod(op.trim(), String.class);
 
