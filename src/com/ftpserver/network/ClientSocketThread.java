@@ -38,7 +38,7 @@ public class ClientSocketThread extends Thread {
         ConsoleLogger.error(df.format(new Date()));
         ConsoleLogger.error(e.toString());
         ConsoleLogger.error(e.getMessage());
-        e.printStackTrace(System.out);
+        e.printStackTrace(System.err);
     }
 
     @Override

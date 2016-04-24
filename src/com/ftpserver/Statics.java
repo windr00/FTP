@@ -62,12 +62,6 @@ public class Statics {
     public static String SYSTEM_STASH;
     public static String SYST_RETURN = "215 ";
 
-    //    λ	接入命令：USER、PASS、ACCT、REIN、QUIT和ABOR；
-//    λ	文件管理命令：CWD、CDUP、DELE、LIST、NLIST、MKD、PWD、RMD、RNFR、RNTO和SMNT；
-//    λ	数据格式化命令：TYPE、STRU、MODE；
-//    λ	端口定义命令包括PORT和PASV;
-//    λ	文件传送命令：RETR、STOR、APPE、STOU、ALLO、REST和STAT；
-//    λ	杂项命令：HELP、NOOP、SITE和SYST
     static {
         String os = System.getProperty("os.name").toUpperCase();
         if (os.startsWith("WIN")) {

@@ -40,20 +40,20 @@ public class UserLoginAgent {
         }
     }
 
-    public void saveSettings(String path) throws Exception {
-        if (fileIO.exist(path)) {
-            fileIO.rmfile(path);
-        }
-        fileIO.create(path);
-        JSONArray jsonArray = new JSONArray();
-        for (String str : userNamePathList.keySet()) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(str, userNamePathList.get(str));
-            jsonArray.add(jsonObject);
-        }
-        byte[] buffer = jsonArray.toString().getBytes();
-        fileIO.write(path, buffer, buffer.length);
-    }
+//    public void saveSettings(String path) throws Exception {
+//        if (fileIO.exist(path)) {
+//            fileIO.rmfile(path);
+//        }
+//        fileIO.create(path);
+//        JSONArray jsonArray = new JSONArray();
+//        for (String str : userNamePathList.keySet()) {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put(str, userNamePathList.get(str));
+//            jsonArray.add(jsonObject);
+//        }
+//        byte[] buffer = jsonArray.toString().getBytes();
+//        fileIO.write(path, buffer, buffer.length);
+//    }
 
     public boolean userAuthenticate(String username, String userpass) {
         if (username.toLowerCase().equals("anonymous") && userNamePathList.containsKey("anonymous")) {

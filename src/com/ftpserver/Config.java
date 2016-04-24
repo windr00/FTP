@@ -28,8 +28,7 @@ public class Config {
         return _instance;
     }
 
-    public boolean init(String path) {
-        try {
+    public void init(String path) throws Exception {
             String jstring = new String(fileIOInstance.read(path));
             JSONArray jsonArray = JSONArray.fromObject(jstring);
             JSONObject jsonObject = jsonArray.getJSONObject(0);
@@ -38,30 +37,10 @@ public class Config {
             this.root = jsonObject.getString("ftpRoot");
 
             this.lsCMD = jsonObject.getString("lsCMD");
-            return !(!fileIOInstance.exist(root) || !fileIOInstance.exist(lsCMD));
-        } catch (Exception e) {
-            return false;
-        }
     }
 
 
-    public void saveSettings(String path) throws Exception {
-        JSONObject jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
 
-        jsonObject.put("cmdPort", String.valueOf(this.cmdPort));
-        jsonObject.put("maxConnection", String.valueOf(this.maxConnection));
-        jsonObject.put("ftpRoot", this.root);
-        jsonObject.put("lsCMD", this.lsCMD);
-        jsonArray.add(0, jsonObject);
-        byte[] buffer = jsonArray.toString().getBytes();
-        if (fileIOInstance.exist(path)) {
-            fileIOInstance.rmfile(path);
-        }
-        fileIOInstance.create(path);
-
-        fileIOInstance.write(path, buffer, buffer.length);
-    }
 
     public int getCmdPort() {
         return cmdPort;

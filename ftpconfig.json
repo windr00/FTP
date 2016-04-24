@@ -1,7 +1,7 @@
 [
   {
     "cmdPort": "1025",
-    "maxConnection": "8",
+    "maxConnection": "10",
     "ftpRoot": "E:\\FTPRoot",
     "lsCMD": "C:\\Program Files\\Git\\usr\\bin\\ls.exe"
   }
