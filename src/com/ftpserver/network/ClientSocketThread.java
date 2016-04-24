@@ -43,6 +43,12 @@ public class ClientSocketThread extends Thread {
 
     @Override
     public void run() {
+        try {
+            communicationInstance.send(client, Statics.INIT_RETURN.getBytes());
+        } catch (Exception e) {
+            handler.cleanUp();
+            return;
+        }
         while (true) {
             try {
                 String cmd = new String(communicationInstance.read(client));

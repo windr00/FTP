@@ -12,14 +12,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
     public static void main(String[] args) {
-        ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(2, 4, 2000, TimeUnit.MICROSECONDS, new ArrayBlockingQueue<Runnable>(4));
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ConsoleLogger.info(df.format(new Date()));
         Config configInstance = Config.getInstance();
@@ -71,12 +69,13 @@ public class Main {
             ConsoleLogger.error("FTP Service init failed");
         }
         //System.out.print("Hello World");
+
+        ExecutorService fixedPool = Executors.newFixedThreadPool(configInstance.getMaxConnection());
         try {
             while (true) {
                 Socket client = communication.accept();
-                communication.send(client, Statics.INIT_RETURN.getBytes());
                 ClientSocketThread thread = new ClientSocketThread(client);
-                thread.start();
+                fixedPool.execute(thread);
             }
             // write your code here
         } catch (Exception e) {
