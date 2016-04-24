@@ -1,12 +1,12 @@
 package com.ftpserver.fileIO;
 
 import com.ftpserver.Config;
+import com.ftpserver.Statics;
 import com.ftpserver.exceptions.FileIsDirectoryException;
 import com.ftpserver.exceptions.FileIsNotDirectoryException;
 
 import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.NoSuchFileException;
 
 /**
  * Created by windr on 4/19/16.
@@ -14,6 +14,9 @@ import java.nio.file.NoSuchFileException;
 public class FileIO {
 
     private static FileIO _instance;
+
+    private FileIO() {
+    }
 
     public static FileIO getInstance() {
         if (_instance == null) {
@@ -53,13 +56,15 @@ public class FileIO {
                     rcrmfile(f);
                 }
             } else {
-                f.delete();
+                if (!f.delete()) {
+                    throw new FileNotFoundException(f.getAbsolutePath());
+                }
             }
         }
     }
 
     public byte[] read(String path) throws Exception {
-        File file = new File(Config.getInstance().getRoot() + path);
+        File file = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String tmp = null;
         StringBuilder sb = new StringBuilder();
@@ -74,10 +79,22 @@ public class FileIO {
         return sb.toString().getBytes();
     }
 
+    private void rccdir(File file) throws Exception {
+        if (file.getParentFile().exists()) {
+            file.mkdir();
+        } else {
+            rccdir(file.getParentFile());
+            file.mkdir();
+        }
+    }
+
     public void create(String path) throws Exception {
         File file = new File(path);
         if (file.exists()) {
             throw new FileAlreadyExistsException(path);
+        }
+        if (!file.getParentFile().exists()) {
+            rccdir(file.getParentFile());
         }
         if (!file.createNewFile()) {
             throw new FileNotFoundException(path);
@@ -102,12 +119,8 @@ public class FileIO {
     public void mkDir(String path) throws Exception {
 
         File file = new File(path);
-        if (file.exists()) {
-            throw new FileAlreadyExistsException(path);
-        }
-        if (!file.mkdir()) {
-            throw new NoSuchFileException(path);
-        }
+        rccdir(file);
+
 
 
     }
@@ -119,7 +132,7 @@ public class FileIO {
     public boolean exist(String path) {
 //        String uri = URI.create(Config.getInstance().getRoot()).toASCIIString();
         File file = new File(path);
-        return file.exists() && file.isDirectory();
+        return file.exists();
     }
 
     public FileInputStream open(String path) throws Exception {
@@ -128,29 +141,11 @@ public class FileIO {
     }
 
     public String cddir(String path) throws Exception {
-//        Process p = Runtime.getRuntime().exec(Config.getInstance().getCdCMD() + Config.getInstance().getRoot() + path + ";" + Config.getInstance().getPwdCMD());
-//        InputStream istream = p.getInputStream();
-//        BufferedReader br = new BufferedReader(new InputStreamReader(istream));
-//        String result = br.readLine();
-//
-//        if (br.readLine() != null){
-//            br.close();
-//            istream.close();
-//            throw new NoSuchFileException(path);
-//        }
-//        istream.close();
-//        br.close();
-//        p.destroy();
-//        result = appendStash(result);
-//        if (result.startsWith(Config.getInstance().getRoot())) {
-//            return result.substring(Config.getInstance().getRoot().length());
-//        }
-//        else {
-//            throw new NoSuchFileException(path);
-//        }
-        // path = appendFilePath(Config.getInstance().getRoot(), path);
-
-        String pathcuts[] = path.split("/");
+        String regex = Statics.SYSTEM_STASH;
+        if (Statics.SYSTEM_STASH.equals("\\")) {
+            regex = "\\\\";
+        }
+        String pathcuts[] = path.split(regex);
         for (int i = 0; i < pathcuts.length; i++) {
             if (pathcuts[i].equals("..")) {
                 pathcuts[i] = "";
@@ -162,10 +157,14 @@ public class FileIO {
                 }
             }
         }
-        String result = "/";
+
+        String result = "";
+        if (Statics.SYSTEM_STASH.equals("/")) {
+            result = "/";
+        }
         for (int i = 0; i < pathcuts.length; i++) {
             if (!pathcuts[i].equals("")) {
-                result += pathcuts[i] + "/";
+                result += pathcuts[i] + Statics.SYSTEM_STASH;
             }
         }
         if (!result.startsWith(appendStash(Config.getInstance().getRoot()))) {
@@ -178,7 +177,7 @@ public class FileIO {
     public String lsdir(String path) throws Exception {
         String ret = "";
 //        path = appendFilePath(Config.getInstance().getRoot(), path);
-        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + path);
+        Process p = Runtime.getRuntime().exec(Config.getInstance().getLsCMD() + " -l " + path);
         InputStream istream = p.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String result = "";
@@ -210,21 +209,21 @@ public class FileIO {
     }
 
     public String appendFilePath(String currentpath, String newPath) {
-        if (!currentpath.endsWith("/")) {
-            currentpath = currentpath.concat("/");
+        if (!currentpath.endsWith(Statics.SYSTEM_STASH)) {
+            currentpath = currentpath.concat(Statics.SYSTEM_STASH);
         }
-        if (!newPath.endsWith("/")) {
-            newPath = newPath.concat("/");
-        }
-        if (newPath.startsWith("/")) {
+//        if (!newPath.endsWith(Statics.SYSTEM_STASH)) {
+//            newPath = newPath.concat(Statics.SYSTEM_STASH);
+//        }
+        if (newPath.startsWith(Statics.SYSTEM_STASH)) {
             newPath = newPath.substring(1);
         }
         return currentpath.concat(newPath);
     }
 
     public String appendStash(String path) {
-        if (!path.endsWith("/")) {
-            path = path.concat("/");
+        if (!path.endsWith(Statics.SYSTEM_STASH)) {
+            path = path.concat(Statics.SYSTEM_STASH);
         }
         return path;
     }

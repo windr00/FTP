@@ -28,9 +28,9 @@ public class CMDHandler {
 
     private boolean isloggedin = false;
 
-    private boolean useUTF8 = false;
+    private boolean useUTF8 = true;
 
-    private Statics.TRANSFER_TYPE netType;
+    private Statics.TRANSFER_TYPE netType = Statics.TRANSFER_TYPE.ASCII;
 
     private Statics.TRANSFER_MODE netMode;
 
@@ -42,13 +42,15 @@ public class CMDHandler {
 
     private Socket dataSocket = null;
 
-    private String currentPath = "/";
+    private String currentPath = Statics.SYSTEM_STASH;
 
     private String renameFile = "";
 
     private FileIO fileIOInstance = FileIO.getInstance();
 
     private Communication commInstance = Communication.getInstance();
+
+    private UserLoginAgent userLoginAgent = UserLoginAgent.getInstance();
 
     private EventHandler onResponseEventHandler;
 
@@ -77,7 +79,7 @@ public class CMDHandler {
 
     public void PASS(String args) throws Exception {
         String userpass = args.trim();
-        isloggedin = UserLoginAgent.userAuthenticate(username, userpass);
+        isloggedin = userLoginAgent.userAuthenticate(username, userpass);
         if (isloggedin) {
             response(Statics.PASS_LOGEDIN_RETURN);
         } else {
@@ -106,13 +108,16 @@ public class CMDHandler {
     }
 
     public void CWD(String args) throws Exception {
-
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             String temp = "";
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            if (args.startsWith("/")) {
+            if (args.startsWith(Statics.SYSTEM_STASH)) {
                 temp = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), args));
             } else {
                 temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
@@ -127,13 +132,17 @@ public class CMDHandler {
     }
 
     public void CDUP(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
-            if (currentPath.equals("/")) {
+            if (currentPath.equals(Statics.SYSTEM_STASH)) {
                 response(Statics.CDUP_SUCC_RETURN);
                 return;
             }
 
-            currentPath = fileIOInstance.appendFilePath(currentPath, "../");
+            currentPath = fileIOInstance.appendFilePath(currentPath, ".." + Statics.SYSTEM_STASH);
             currentPath = fileIOInstance.cddir(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), currentPath));
             response(Statics.CDUP_SUCC_RETURN);
 
@@ -144,8 +153,12 @@ public class CMDHandler {
     }
 
     public void PWD(String args) throws Exception {
-        if (!currentPath.startsWith("/")) {
-            currentPath = "/" + currentPath;
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
+        if (!currentPath.startsWith(Statics.SYSTEM_STASH)) {
+            currentPath = Statics.SYSTEM_STASH + currentPath;
         }
         response(Statics.PWD_RETURN + "\"" + currentPath + "\"\n");
     }
@@ -168,7 +181,11 @@ public class CMDHandler {
                 response(Statics.OPTS_UTF8_OFF_RETURN);
                 useUTF8 = false;
             }
+        } else if (args.contains("GB2312") && args.contains("ON")) {
+            response(Statics.OPTS_UTF8_OFF_RETURN);
+            useUTF8 = false;
         } else {
+
             response(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
         }
     }
@@ -212,7 +229,9 @@ public class CMDHandler {
     }
 
     private void setDataSocket() throws Exception {
-        pasvSocket.setSoTimeout(0);
+        if (pasvSocket != null) {
+            pasvSocket.setSoTimeout(0);
+        }
         if (netMode == Statics.TRANSFER_MODE.PORT) {
             dataSocket = new Socket(this.portHost, this.portPort);
         } else {
@@ -224,10 +243,10 @@ public class CMDHandler {
 
     public void PASV(String args) throws Exception {
         try {
+            int p = getUnusedPort();
             if (pasvSocket != null) {
                 pasvSocket.close();
             }
-            int p = getUnusedPort();
             pasvSocket = new ServerSocket(p);
             String ip = InetAddress.getLocalHost().getHostAddress().replace('.', ',');
             String port = String.valueOf(p / 256) + "," + String.valueOf(p % 256);
@@ -265,11 +284,18 @@ public class CMDHandler {
     }
 
     public void RETR(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
-            String filepath = args.trim();
+            String filepath = args;
             String temp = fileIOInstance.appendFilePath(currentPath, filepath);
             temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
-            setDataSocket();
+            if (fileIOInstance.isDir(temp)) {
+                response(Statics.RETR_FAILED_RETURN);
+                return;
+            }
             FileInputStream filereader = fileIOInstance.open(temp);
             byte buffer[] = new byte[Statics.FILE_READ_BUFFER_LENGTH];
             int current_length = 0;
@@ -278,7 +304,7 @@ public class CMDHandler {
             } else {
                 response(Statics.RETR_STRART_I_RETURN);
             }
-
+            setDataSocket();
             while ((current_length = filereader.read(buffer)) != -1) {
                 if (netType == Statics.TRANSFER_TYPE.ASCII) {
                     buffer = parseReturnChar(buffer, current_length);
@@ -299,10 +325,18 @@ public class CMDHandler {
     }
 
     public void STOR(String args) throws Exception {
-        args = args.trim();
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
+            }
+            if (netType == Statics.TRANSFER_TYPE.ASCII) {
+                response(Statics.STOR_STRART_A_RETURN);
+            } else {
+                response(Statics.STOR_STRART_I_RETURN);
             }
             setDataSocket();
             if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)))) {
@@ -311,11 +345,6 @@ public class CMDHandler {
             InputStream istream = dataSocket.getInputStream();
             byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
             int amount = 0;
-            if (netType == Statics.TRANSFER_TYPE.ASCII) {
-                response(Statics.STOR_STRART_A_RETURN);
-            } else {
-                response(Statics.STOR_STRART_I_RETURN);
-            }
             fileIOInstance.create(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)));
             String file = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
             while ((amount = istream.read(buffer)) != -1) {
@@ -333,6 +362,10 @@ public class CMDHandler {
     }
 
     public void MKD(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -353,6 +386,10 @@ public class CMDHandler {
     }
 
     public void RMD(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -372,6 +409,10 @@ public class CMDHandler {
     }
 
     public void DELE(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -392,7 +433,7 @@ public class CMDHandler {
 
 
     public void ABOR(String args) throws Exception {
-        if (dataSocket.isConnected()) {
+        if (dataSocket != null && !dataSocket.isClosed()) {
             dataSocket.close();
             response(Statics.ABOR_SUCC_RETURN);
         } else {
@@ -401,6 +442,10 @@ public class CMDHandler {
     }
 
     public void LIST(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             response(Statics.LIST_START_RETURN);
             setDataSocket();
@@ -423,6 +468,10 @@ public class CMDHandler {
     }
 
     public void RNFR(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -440,6 +489,10 @@ public class CMDHandler {
     }
 
     public void RNTO(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
@@ -458,6 +511,10 @@ public class CMDHandler {
     }
 
     public void SIZE(String args) throws Exception {
+        if (!isloggedin) {
+            response(Statics.CMD_NOT_ALLOWED_RETURN);
+            return;
+        }
         try {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));

@@ -46,6 +46,11 @@ public class ClientSocketThread extends Thread {
         while (true) {
             try {
                 String cmd = new String(communicationInstance.read(client));
+                if (Statics.SYSTEM_STASH == "\\") {
+                    if (cmd.contains("/\\/")) {
+                        cmd = cmd.replace("/\\/", "\\");
+                    }
+                }
                 String[] params = cmd.split(" ");
                 String op = params[0];
                 op = op.toUpperCase();
@@ -53,15 +58,21 @@ public class ClientSocketThread extends Thread {
                 cmd = "";
                 for (int i = 1; i < params.length; i++) {
                     cmd += params[i];
+                    if (i != params.length - 1) {
+                        cmd += " ";
+                    }
                 }
+
                 try {
                     Method handle = handler.getClass().getMethod(op.trim(), String.class);
 
                     handle.invoke(handler, cmd);
-                } catch (NoSuchMethodException e) {
+                } catch (Exception e) {
                     logException(e);
                     try {
-                        onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                        if (e.getClass() == NoSuchMethodException.class) {
+                            onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
+                        }
                     } catch (Exception ex) {
                         logException(ex);
                     }
