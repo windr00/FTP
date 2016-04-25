@@ -1,10 +1,10 @@
 package com.ftpserver;
 
+import com.ftpserver.agent.ClientAgent;
 import com.ftpserver.agent.SafePassAgent;
 import com.ftpserver.agent.UserLoginAgent;
 import com.ftpserver.logger.ConsoleLogger;
 import com.ftpserver.logger.NetTransferLogger;
-import com.ftpserver.network.ClientSocketThread;
 import com.ftpserver.network.Communication;
 
 import java.net.InetAddress;
@@ -66,7 +66,7 @@ public class Main {
                 Socket client = communication.accept();
                 String ip = client.getInetAddress().toString().substring(1);
                 if (SafePassAgent.getInstance().isAllowed(ip)) {
-                    ClientSocketThread thread = new ClientSocketThread(client);
+                    ClientAgent thread = new ClientAgent(client);
                     fixedPool.execute(thread);
                 } else {
                     communication.send(client, "421 IP NOT ALLOWED".getBytes());

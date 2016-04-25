@@ -2,7 +2,7 @@
   {
     "cmdPort": "1025",
     "maxConnection": "10",
-    "ftpRoot": "E:\\FTPRoot",
-    "lsCMD": "C:\\Program Files\\Git\\usr\\bin\\ls.exe"
+    "ftpRoot": "/Users/windr/Desktop",
+    "lsCMD": "/bin/ls"
   }
 ]

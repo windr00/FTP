@@ -15,6 +15,8 @@ public class UserLoginAgent {
 
     private HashMap<String, String> userNamePathList;
 
+    private String filepath;
+
     private FileIO fileIO;
 
     private UserLoginAgent() {
@@ -30,6 +32,7 @@ public class UserLoginAgent {
     }
 
     public void init(String path) throws Exception {
+        filepath = path;
         String jstring = new String(fileIO.read(path));
         JSONArray jsonArray = JSONArray.fromObject(jstring);
         for (int i = 0; i < jsonArray.size(); i++) {
@@ -40,22 +43,10 @@ public class UserLoginAgent {
         }
     }
 
-//    public void saveSettings(String path) throws Exception {
-//        if (fileIO.exist(path)) {
-//            fileIO.rmfile(path);
-//        }
-//        fileIO.create(path);
-//        JSONArray jsonArray = new JSONArray();
-//        for (String str : userNamePathList.keySet()) {
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put(str, userNamePathList.get(str));
-//            jsonArray.add(jsonObject);
-//        }
-//        byte[] buffer = jsonArray.toString().getBytes();
-//        fileIO.write(path, buffer, buffer.length);
-//    }
+    public boolean userAuthenticate(String username, String userpass) throws Exception {
+        userNamePathList.clear();
+        init(filepath);
 
-    public boolean userAuthenticate(String username, String userpass) {
         if (username.toLowerCase().equals("anonymous") && userNamePathList.containsKey("anonymous")) {
             return true;
         } else if (userNamePathList.containsKey(username) && userNamePathList.get(username).equals(userpass)) {

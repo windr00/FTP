@@ -11,6 +11,8 @@ public class SafePassAgent {
     private static SafePassAgent _instance;
     private HashMap<String, MODE> ipRestrctItemMap = new HashMap<>();
 
+    private String filepath;
+
     public static SafePassAgent getInstance() {
         if (_instance == null) {
             _instance = new SafePassAgent();
@@ -19,6 +21,7 @@ public class SafePassAgent {
     }
 
     public void init(String path) throws Exception {
+        filepath = path;
         FileIO fileIO = FileIO.getInstance();
         String jstring = new String(fileIO.read(path));
         JSONArray jsonArray = JSONArray.fromObject(jstring);
@@ -28,7 +31,12 @@ public class SafePassAgent {
         }
     }
 
-    public boolean isAllowed(String ip) {
+    public boolean isAllowed(String ip) throws Exception {
+        ipRestrctItemMap.clear();
+        init(filepath);
+        if (ipRestrctItemMap.containsKey("*.*.*.*")) {
+            return ipRestrctItemMap.get("*.*.*.*") == MODE.ALLOW;
+        }
         if (ipRestrctItemMap.containsKey(ip)) {
             MODE mode = ipRestrctItemMap.get(ip);
             if (mode == MODE.ALLOW) {

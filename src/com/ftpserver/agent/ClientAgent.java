@@ -1,8 +1,9 @@
-package com.ftpserver.network;
+package com.ftpserver.agent;
 
 import com.ftpserver.Statics;
 import com.ftpserver.commandhandler.CMDHandler;
 import com.ftpserver.logger.ConsoleLogger;
+import com.ftpserver.network.Communication;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -13,7 +14,7 @@ import java.util.Date;
 /**
  * Created by windr on 4/18/16.
  */
-public class ClientSocketThread extends Thread {
+public class ClientAgent extends Thread {
 
     private Socket client;
     private String userName = "";
@@ -23,7 +24,7 @@ public class ClientSocketThread extends Thread {
 
     private CMDHandler handler;
 
-    public ClientSocketThread(Socket client) {
+    public ClientAgent(Socket client) {
         communicationInstance = Communication.getInstance();
         handler = new CMDHandler(this, "onResponse");
         this.client = client;
