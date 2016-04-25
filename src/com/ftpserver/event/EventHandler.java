@@ -10,7 +10,7 @@ public class EventHandler {
     private List<Event> eventList;
 
     public EventHandler() {
-        eventList = new ArrayList<Event>();
+        eventList = new ArrayList<>();
     }
 
     public void addEvent(Event e) {

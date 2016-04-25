@@ -277,9 +277,7 @@ public class CMDHandler {
             }
         }
         buffer = new byte[k];
-        for (int i = 0; i < k; i++) {
-            buffer[i] = ret[i];
-        }
+        System.arraycopy(ret, 0, buffer, 0, k);
         return buffer;
     }
 

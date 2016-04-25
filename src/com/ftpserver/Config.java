@@ -46,32 +46,17 @@ public class Config {
         return cmdPort;
     }
 
-    public void setCmdPort(int cmdPort) {
-        this.cmdPort = cmdPort;
-    }
 
     public int getMaxConnection() {
         return maxConnection;
-    }
-
-    public void setMaxConnection(int maxConnection) {
-        this.maxConnection = maxConnection;
     }
 
     public String getLsCMD() {
         return lsCMD;
     }
 
-    public void setLsCMD(String lsCMD) {
-        this.lsCMD = lsCMD;
-    }
-
     public String getRoot() {
         return root;
-    }
-
-    public void setRoot(String root) {
-        this.root = root;
     }
 
 }

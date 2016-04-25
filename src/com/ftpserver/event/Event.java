@@ -53,7 +53,7 @@ public class Event {
         this.argTypes = argTypes;
     }
 
-    protected void parseArgTypes() {
+    private void parseArgTypes() {
         this.argTypes = new Class[args.length];
 
         for (int i = 0; i < args.length; i++) {
@@ -61,7 +61,7 @@ public class Event {
         }
     }
 
-    public void invoke(Object... args) throws Exception {
+    void invoke(Object... args) throws Exception {
         this.args = args;
         parseArgTypes();
 

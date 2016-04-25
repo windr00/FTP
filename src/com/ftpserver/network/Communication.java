@@ -20,8 +20,6 @@ public class Communication {
 
     private ServerSocket server;
 
-    private int commandPort;
-
     private Communication() {
         this.eventHandler = new EventHandler();
     }
@@ -40,7 +38,6 @@ public class Communication {
 
     public void bind(int port, int maxConnect) throws IOException {
         this.server = new ServerSocket(port, maxConnect);
-        commandPort = port;
     }
 
 

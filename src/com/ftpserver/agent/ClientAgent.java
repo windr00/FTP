@@ -12,13 +12,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by windr on 4/18/16.
+ * Created by Micro on 2016/4/19.
  */
+
 public class ClientAgent extends Thread {
 
     private Socket client;
-    private String userName = "";
-    private String passwd = "";
 
     private Communication communicationInstance;
 
@@ -30,7 +29,7 @@ public class ClientAgent extends Thread {
         this.client = client;
     }
 
-    public void onResponse(java.lang.String msg) throws Exception {
+    private void onResponse(java.lang.String msg) throws Exception {
         communicationInstance.send(client, msg.getBytes());
     }
 
@@ -53,7 +52,7 @@ public class ClientAgent extends Thread {
         while (true) {
             try {
                 String cmd = new String(communicationInstance.read(client));
-                if (Statics.SYSTEM_STASH == "\\") {
+                if (Statics.SYSTEM_STASH.equals("\\")) {
                     if (cmd.contains("/\\/")) {
                         cmd = cmd.replace("/\\/", "\\");
                     }
