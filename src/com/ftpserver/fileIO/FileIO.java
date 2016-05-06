@@ -181,11 +181,18 @@ public class FileIO {
         InputStream istream = p.getInputStream();
         BufferedReader br = new BufferedReader(new InputStreamReader(istream));
         String result = "";
+        int ln = 0;
         while ((result = br.readLine()) != null) {
+            if (ln == 0) {
+                ln++;
+                continue;
+            }
             ret += result + "\n";
+            ln++;
         }
         br.close();
         istream.close();
+        ret = "total " + String.valueOf(ln - 1) + "\n" + ret;
         return ret;
     }
 

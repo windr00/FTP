@@ -29,7 +29,7 @@ public class ClientAgent extends Thread {
         this.client = client;
     }
 
-    private void onResponse(java.lang.String msg) throws Exception {
+    public void onResponse(java.lang.String msg) throws Exception {
         communicationInstance.send(client, msg.getBytes());
     }
 
@@ -74,13 +74,13 @@ public class ClientAgent extends Thread {
 
                     handle.invoke(handler, cmd);
                 } catch (Exception e) {
-                    logException(e);
+                    //logException(e);
                     try {
                         if (e.getClass() == NoSuchMethodException.class) {
                             onResponse(Statics.COMMAND_NOT_UNDERSTOOD_RETURN);
                         }
                     } catch (Exception ex) {
-                        logException(ex);
+                        //logException(ex);
                     }
                 }
                 if (op.equals("QUIT")) {
@@ -90,11 +90,12 @@ public class ClientAgent extends Thread {
                     break;
                 }
             } catch (Exception e) {
-                logException(e);
+                //logException(e);
 
                 handler.cleanUp();
                 try {
                     client.close();
+                    ConsoleLogger.info("CLOSE ON " + client.toString());
                 } catch (IOException ex) {
                     return;
 
