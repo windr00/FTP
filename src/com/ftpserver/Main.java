@@ -7,7 +7,6 @@ import com.ftpserver.logger.ConsoleLogger;
 import com.ftpserver.logger.NetTransferLogger;
 import com.ftpserver.network.Communication;
 
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,7 +46,7 @@ public class Main {
 
         try {
             communication.bind(configInstance.getCmdPort(), configInstance.getMaxConnection());
-            ConsoleLogger.info("FTP Service started on " + "\"" + configInstance.getRoot() + "\"@" + InetAddress.getLocalHost().getHostAddress() + ":" + configInstance.getCmdPort());
+            ConsoleLogger.info("FTP Service started on " + "\"" + configInstance.getRoot() + "\"@" + communication.getHostAddress() + ":" + configInstance.getCmdPort());
         } catch (Exception e) {
             ConsoleLogger.error(e.toString());
             ConsoleLogger.error(e.getMessage());

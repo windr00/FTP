@@ -25,7 +25,7 @@ public class ClientAgent extends Thread {
 
     public ClientAgent(Socket client) {
         communicationInstance = Communication.getInstance();
-        handler = new CMDHandler(this, "onResponse");
+        handler = new CMDHandler(this, "onResponse", client.getLocalAddress().getHostAddress());
         this.client = client;
     }
 

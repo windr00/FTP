@@ -31,6 +31,10 @@ public class Communication {
         return _instance;
     }
 
+    public String getHostAddress() {
+        return server.getInetAddress().getHostAddress();
+    }
+
     public void addNetworkTransferEventListener(Object obj, String mtd) {
         Event event = new Event(obj, mtd);
         this.eventHandler.addEvent(event);

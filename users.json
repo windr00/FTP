@@ -6,5 +6,9 @@
   {
     "name": "fhb",
     "passwd": "fhb"
+  },
+  {
+    "name": "a",
+    "passwd": "a"
   }
 ]

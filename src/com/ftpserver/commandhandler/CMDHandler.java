@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.FileAlreadyExistsException;
@@ -25,6 +24,8 @@ import java.nio.file.FileAlreadyExistsException;
 public class CMDHandler {
 
     private String username = "";
+
+    private String clientAddress = "";
 
     private boolean isloggedin = false;
 
@@ -54,9 +55,10 @@ public class CMDHandler {
 
     private EventHandler onResponseEventHandler;
 
-    public CMDHandler(Object obj, String mtd) {
+    public CMDHandler(Object obj, String mtd, String clientAddress) {
         onResponseEventHandler = new EventHandler();
         onResponseEventHandler.addEvent(new Event(obj, mtd));
+        this.clientAddress = clientAddress;
     }
 
     public void cleanUp() {
@@ -248,7 +250,7 @@ public class CMDHandler {
                 pasvSocket.close();
             }
             pasvSocket = new ServerSocket(p);
-            String ip = InetAddress.getLocalHost().getHostAddress().replace('.', ',');
+            String ip = clientAddress.replace('.', ',');
             String port = String.valueOf(p / 256) + "," + String.valueOf(p % 256);
             netMode = Statics.TRANSFER_MODE.PASV;
             response(Statics.PASV_SUCC_RETURN + ip + "," + port + ")\n");
