@@ -18,7 +18,8 @@ public class Main {
         Communication communication = Communication.getInstance();
         communication.addNetworkTransferEventListener(NetTransferLogger.getInstance(), "logNetTransfer");
         try {
-            configInstance.init("." + Statics.SYSTEM_STASH + "ftpconfig.json");
+            ConsoleLogger.info("Server jar current at " + Statics.CURRENT_JAR_PATH);
+            configInstance.init(/*Statics.SYSTEM_POINT + Statics.SYSTEM_STASH +*/Statics.CURRENT_JAR_PATH + Statics.SYSTEM_STASH + "ftpconfig.json");
         } catch (Exception e) {
             ConsoleLogger.error("\"ftpconfig.json\" DOESN'T EXIST OR DAMAGED");
             ConsoleLogger.info("Please use config tool to edit server configuration");
@@ -27,7 +28,7 @@ public class Main {
         }
 
         try {
-            UserLoginAgent.getInstance().init("." + Statics.SYSTEM_STASH + "users.json");
+            UserLoginAgent.getInstance().init(/*Statics.SYSTEM_POINT + Statics.SYSTEM_STASH + */ Statics.CURRENT_JAR_PATH + Statics.SYSTEM_STASH + "users.json");
         } catch (Exception e) {
             ConsoleLogger.error("\"user.json\" DOESN'T EXIST OR DAMAGED");
             ConsoleLogger.info("Please use config tool to edit server configuration");
@@ -36,7 +37,7 @@ public class Main {
         }
 
         try {
-            SafePassAgent.getInstance().init("." + Statics.SYSTEM_STASH + "iprestrict.json");
+            SafePassAgent.getInstance().init(/*"." + Statics.SYSTEM_STASH + */ Statics.CURRENT_JAR_PATH + Statics.SYSTEM_STASH + "iprestrict.json");
         } catch (Exception e) {
             ConsoleLogger.error("\"iprestrict.json\" DOESN'T EXIST OR DAMAGED");
             ConsoleLogger.error("Please use config tool to edit server configuration");

@@ -290,7 +290,12 @@ public class CMDHandler {
         }
         try {
             String filepath = args;
-            String temp = fileIOInstance.appendFilePath(currentPath, filepath);
+            String temp;
+            if (!filepath.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(currentPath, filepath);
+            } else {
+                temp = filepath;
+            }
             temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             if (fileIOInstance.isDir(temp)) {
                 response(Statics.RETR_FAILED_RETURN);
@@ -339,14 +344,20 @@ public class CMDHandler {
                 response(Statics.STOR_STRART_I_RETURN);
             }
             setDataSocket();
-            if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)))) {
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(currentPath, args);
+            } else {
+                temp = args;
+            }
+            if (fileIOInstance.exist(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp))) {
                 throw new FileAlreadyExistsException(args);
             }
             InputStream istream = dataSocket.getInputStream();
             byte buffer[] = new byte[Statics.NET_READ_BUFFER_LENGTH];
             int amount = 0;
-            fileIOInstance.create(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args)));
-            String file = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            fileIOInstance.create(fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp));
+            String file = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             while ((amount = istream.read(buffer)) != -1) {
 
                 fileIOInstance.write(file, buffer, amount);
@@ -370,7 +381,12 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(currentPath, args);
+            } else {
+                temp = args;
+            }
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.mkDir(fullpath);
             response(Statics.MKD_SUCC_RETURN);
@@ -394,7 +410,12 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(currentPath, args);
+            } else {
+                temp = args;
+            }
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.rmdir(fullpath);
             response(Statics.RMD_SUCC_RETURN);
@@ -417,7 +438,12 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            String temp = fileIOInstance.appendFilePath(currentPath, args);
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(currentPath, args);
+            } else {
+                temp = args;
+            }
             String fullpath = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), temp);
             fileIOInstance.rmfile(fullpath);
             response(Statics.DELE_SUCC_RETURN);
@@ -476,7 +502,12 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+                temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            } else {
+                temp = args;
+            }
             if (!fileIOInstance.exist(temp)) {
                 throw new FileNotFoundException(args);
             }
@@ -498,7 +529,7 @@ public class CMDHandler {
                 args = new String(args.getBytes("GB2312"));
             }
             String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
-            if (fileIOInstance.exist(temp)) {
+            if (fileIOInstance.exist(temp) || args.startsWith(Statics.SYSTEM_STASH)) {
                 throw new FileAlreadyExistsException(temp);
             }
             fileIOInstance.rnfile(renameFile, temp);
@@ -519,7 +550,13 @@ public class CMDHandler {
             if (!useUTF8) {
                 args = new String(args.getBytes("GB2312"));
             }
-            String temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            String temp;
+            if (!args.startsWith(Statics.SYSTEM_STASH)) {
+
+                temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), fileIOInstance.appendFilePath(currentPath, args));
+            } else {
+                temp = fileIOInstance.appendFilePath(Config.getInstance().getRoot(), args);
+            }
             long size = fileIOInstance.getsize(temp);
             response(Statics.SIZE_SUCC_RETURN + String.valueOf(size) + "\n");
         } catch (Exception e) {

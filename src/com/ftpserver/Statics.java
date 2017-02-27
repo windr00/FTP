@@ -60,6 +60,7 @@ public class Statics {
     public static final String SIZE_FAILED_RETURN = "500 GET SIZE FAILED\n";
     public static final String CMD_NOT_ALLOWED_RETURN = "450 CMD NOT ALLOWED, YOU MAY NEED TO LOGIN FIRST\n";
     public static String SYSTEM_STASH;
+    public static String CURRENT_JAR_PATH;
     public static String SYST_RETURN = "215 ";
 
     static {
@@ -70,6 +71,21 @@ public class Statics {
             SYSTEM_STASH = "/";
         }
         SYST_RETURN = SYST_RETURN + os + "\n";
+
+
+        java.net.URL url = Statics.class.getProtectionDomain().getCodeSource().getLocation();
+        String filePath = null;
+        try {
+            filePath = java.net.URLDecoder.decode(url.getPath(), "utf-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (filePath.endsWith(".jar")) {
+            filePath = filePath.substring(0, filePath.lastIndexOf("/") + 1);
+        }
+        java.io.File file = new java.io.File(filePath);
+        CURRENT_JAR_PATH = file.getAbsolutePath();
+
     }
 
 
